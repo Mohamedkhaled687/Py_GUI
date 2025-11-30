@@ -2,37 +2,101 @@
   "users": [
     {
       "id": "1",
-      "name": "User 1",
-      "posts": [],
+      "name": "Ahmed Ali",
+      "posts": [
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "economy",
+            "finance"
+          ]
+        },
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "sports",
+            "history"
+          ]
+        },
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "food",
+            "health"
+          ]
+        }
+      ],
       "followers": [
         "2",
-        "4"
+        "3"
+      ],
+      "followings": [
+        "2",
+        "3"
       ]
     },
     {
       "id": "2",
-      "name": "User 2",
-      "posts": [],
+      "name": "Yasser Ahmed",
+      "posts": [
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "sports",
+            "health"
+          ]
+        }
+      ],
       "followers": [
-        "3",
-        "4"
+        "1"
+      ],
+      "followings": [
+        "1"
       ]
     },
     {
       "id": "3",
-      "name": "User 3",
-      "posts": [],
+      "name": "Mohamed Sherif",
+      "posts": [
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "sports"
+          ]
+        }
+      ],
       "followers": [
-        "2"
+        "1"
+      ],
+      "followings": [
+        "1"
       ]
     },
     {
       "id": "4",
-      "name": "User 4",
-      "posts": [],
+      "name": "Fady Faragallah",
+      "posts": [
+        {
+          "id": null,
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "topics": [
+            "Data",
+            "Software Engineering"
+          ]
+        }
+      ],
       "followers": [
         "1",
+        "2",
         "3"
+      ],
+      "followings": [
+        "2"
       ]
     }
   ]

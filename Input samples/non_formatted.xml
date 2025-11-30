@@ -1,84 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<social_network>
-    <metadata>
-        <created_date>2023-09-15</created_date>
-        <version>1.0</version>
-        <total_users>3</total_users>
-    </metadata>
-    <users>
-        <user id="1001">
-            <name>Alice Johnson</name>
-            <username>alice_j</username>
-            <email>alice.johnson@email.com</email>
-            <age>28</age>
-            <location>New York, USA</location>
-            <join_date>2020-03-15</join_date>
-            <followers>1250</followers>
-            <following>320</following>
-            <posts>
-                <post id="p1001">
-                    <content>Just finished reading a great book about AI!</content>
-                    <timestamp>2023-09-10 14:30:00</timestamp>
-                    <likes>45</likes>
-                </post>
-                <post id="p1002">
-                    <content>Beautiful sunset today in Central Park 🌅</content>
-                    <timestamp>2023-09-12 18:45:00</timestamp>
-                    <likes>89</likes>
-                </post>
-            </posts>
-            <connections>
-                <friend user_id="1002"/>
-                <friend user_id="1003"/>
-            </connections>
-        </user>
-        <user id="1002">
-            <name>Bob Smith</name>
-            <username>bob_smith</username>
-            <email>bob.smith@email.com</email>
-            <age>35</age>
-            <location>San Francisco, USA</location>
-            <join_date>2019-07-22</join_date>
-            <followers>2100</followers>
-            <following>450</following>
-            <posts>
-                <post id="p2001">
-                    <content>Excited to announce our new startup launch!</content>
-                    <timestamp>2023-09-08 09:00:00</timestamp>
-                    <likes>234</likes>
-                </post>
-            </posts>
-            <connections>
-                <friend user_id="1001"/>
-                <friend user_id="1003"/>
-            </connections>
-        </user>
-        <user id="1003">
-            <name>Carol Martinez</name>
-            <username>carol_m</username>
-            <email>carol.martinez@email.com</email>
-            <age>42</age>
-            <location>Austin, USA</location>
-            <join_date>2018-11-30</join_date>
-            <followers>3500</followers>
-            <following>890</following>
-            <posts>
-                <post id="p3001">
-                    <content>Teaching web development is my passion! 💻</content>
-                    <timestamp>2023-09-11 11:20:00</timestamp>
-                    <likes>156</likes>
-                </post>
-            </posts>
-            <connections>
-                <friend user_id="1001"/>
-                <friend user_id="1002"/>
-            </connections>
-        </user>
-    </users>
-    <statistics>
-        <total_posts>4</total_posts>
-        <total_connections>6</total_connections>
-        <avg_followers>2283</avg_followers>
-        <most_active_user>1003</most_active_user>
-    </statistics>
-</social_network>
+<users>
+<user>
+<id>1</id>
+<name>Ahmed Ali</name>
+<posts>
+<post>
+<body>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+</body>
+<topics>
+<topic>
+economy
+</topic>
+<topic>
+finance
+</topic>
+</topics>
+</post>
+<post>
+<body>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+</body>
+<topics>
+<topic>
+solar_energy
+</topic>
+</topics>
+</post>
+</posts>
+<followers>
+<follower>
+<id>2</id>
+</follower>
+<follower>
+<id>3</id>
+</follower>
+</followers>
+<followings>
+<following>
+<id>2</id>
+</following>
+<following>
+<id>3</id>
+</following>
+</followings>
+</user>
+<user>
+<id>2</id>
+<name>Yasser Ahmed</name>
+<posts>
+<post>
+<body>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+</body>
+<topics>
+<topic>
+education
+</topic>
+</topics>
+</post>
+</posts>
+<followers>
+<follower>
+<id>1</id>
+</follower>
+</followers>
+<followings>
+<following>
+<id>1</id>
+</following>
+</followings>
+</user>
+<user>
+<id>3</id>
+<name>Mohamed Sherif</name>
+<posts>
+<post>
+<body>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+</body>
+<topics>
+<topic>
+sports
+</topic>
+</topics>
+</post>
+</posts>
+<followers>
+<follower>
+<id>1</id>
+</follower>
+</followers>
+<followings>
+<following>
+<id>1</id>
+</following>
+</followings>
+</user>
+</users>
