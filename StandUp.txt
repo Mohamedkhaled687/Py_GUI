@@ -1,0 +1,23 @@
+================================= Level 1 =================================
+
+CLI additions:
+1. Run the application through the command line using the command xml_editor followed by the action, input, and output files locations
+
+ 	xml_editor verify -i input_file.xml
+xml_editor format -i input_file.xml -o output_file.xml
+xml_editor json -i input_file.xml -o output_file.json
+xml_editor mini -i input_file.xml -o output_file.xml
+xml_editor compress -i input_file.xml -o output_file.xml
+xml_editor decompress -i input_file.comp -o output_file.xml
+
+GUI additions:
+1. Support saving the output file in a location determined by the user.
+2. Show errors in the XML file in a user-friendly way (tag --- of user --- wasn't closed, wrong value for tag ---, ...)
+
+Controller's additions:
+1. allow input to be entered by browsing between files as well as entering text manually by the user.
+2. Solve minor problems if detected (closing an opening tag, correcting spelling mistakes between closing & opening tags, ...)
+3. Minifying the XML file by removing the white spaces and indentations.
+4. Compressing & Decompressing the XML file using a suitable technique.
+
+ 
