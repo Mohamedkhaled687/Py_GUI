@@ -9,7 +9,7 @@ The code is organized following OOP principles with separation of concerns:
 
 import sys
 from PySide6.QtWidgets import QApplication
-from UI.main_window import MainWindow
+from src.ui.main_window import MainWindow
 
 
 def main():

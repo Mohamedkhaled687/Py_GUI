@@ -8,11 +8,11 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt
 
-from Controllers.xml_controller import XMLController
-from Controllers.data_controller import DataController
-from Controllers.graph_controller import GraphController
-from UI.code_viewer_window import CodeViewerWindow
-from UI.graph_visualization_window import GraphVisualizationWindow
+from ..controllers.xml_controller import XMLController
+from ..controllers.data_controller import DataController
+from ..controllers.graph_controller import GraphController
+from .code_viewer_window import CodeViewerWindow
+from .graph_visualization_window import GraphVisualizationWindow
 
 
 class MainWindow(QMainWindow):
@@ -465,7 +465,6 @@ class MainWindow(QMainWindow):
         self.log_message(f"✓ Total Users: {stats['total_users']}")
         self.log_message(f"✓ Total Posts: {stats['total_posts']}")
         self.log_message(f"✓ Average Followers per User: {stats['avg_followers']:.1f}")
-        self.log_message(f"✓ Average Age: {stats['avg_age']:.1f} years")
         self.log_message(f"✓ Average Posts per User: {stats['avg_posts']:.1f}")
         
         stats_text = (
@@ -478,9 +477,7 @@ class MainWindow(QMainWindow):
             f"Averages:\n"
             f"  - Posts per User: {stats['avg_posts']:.1f}\n"
             f"  - Followers per User: {stats['avg_followers']:.1f}\n"
-            f"  - Age: {stats['avg_age']:.1f} years\n"
         )
-        
         QMessageBox.information(self, "User Statistics", stats_text)
     
     def export_to_json(self):

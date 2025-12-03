@@ -166,12 +166,17 @@ class DataController:
                 posts = user.findall('.//post')
                 total_posts += len(posts)
 
-                followers = user.find('followers')
-                if followers is not None and followers.text:
-                    try:
-                        total_followers += int(followers.text.strip())
-                    except (ValueError, AttributeError):
-                        pass
+                # Count followers - handle list structure <followers><follower><id>...</id></follower></followers>
+                followers_elem = user.find('followers')
+                if followers_elem is not None:
+                    follower_count = len(followers_elem.findall('follower'))
+                    total_followers += follower_count
+
+                # Count followings - handle list structure <followings><following><id>...</id></following></followings>
+                followings_elem = user.find('followings')
+                if followings_elem is not None:
+                    following_count = len(followings_elem.findall('following'))
+                    total_following += following_count
 
                 following = user.find('following')
                 if following is not None and following.text:
