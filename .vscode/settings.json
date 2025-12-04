@@ -1,7 +1,0 @@
-{
-    "python.defaultInterpreterPath": "/home/mohamed-khaled/miniconda3/bin/python",
-    "python.analysis.extraPaths": [
-        "/home/mohamed-khaled/miniconda3/lib/python3.13/site-packages"
-    ]
-}
-
