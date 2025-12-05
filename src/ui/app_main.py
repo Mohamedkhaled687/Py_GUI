@@ -1,0 +1,70 @@
+"""
+Application Manager - Controls the flow between windows
+"""
+import sys
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QFont
+
+
+class AppManager:
+    """Manages the application flow between windows."""
+
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+
+        # Set application font
+        font = QFont("Segoe UI", 10)
+        self.app.setFont(font)
+
+        # Import here to avoid circular imports
+        from landing_window import LandingWindow
+
+        self.landing_window = LandingWindow()
+        self.browse_window = None
+        self.manual_window = None
+
+        # Connect navigation signals
+        self.landing_window.browse_clicked.connect(self.show_browse_mode)
+        self.landing_window.manual_clicked.connect(self.show_manual_mode)
+
+        # Show landing window
+        self.landing_window.show()
+
+    def show_browse_mode(self):
+        """Show browse mode window."""
+        from browse_window import BrowseWindow
+
+        if self.browse_window is None:
+            self.browse_window = BrowseWindow()
+            self.browse_window.back_clicked.connect(self.show_landing)
+
+        self.landing_window.hide()
+        self.browse_window.show()
+
+    def show_manual_mode(self):
+        """Show manual mode window."""
+        from manual_window import ManualWindow
+
+        if self.manual_window is None:
+            self.manual_window = ManualWindow()
+            self.manual_window.back_clicked.connect(self.show_landing)
+
+        self.landing_window.hide()
+        self.manual_window.show()
+
+    def show_landing(self):
+        """Return to landing window."""
+        if self.browse_window:
+            self.browse_window.hide()
+        if self.manual_window:
+            self.manual_window.hide()
+        self.landing_window.show()
+
+    def run(self):
+        """Start the Qt event loop."""
+        sys.exit(self.app.exec())
+
+
+if __name__ == '__main__':
+    manager = AppManager()
+    manager.run()
