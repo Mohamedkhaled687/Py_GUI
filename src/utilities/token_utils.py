@@ -1,4 +1,3 @@
-# token_utils.py
 """
 Utilities for scanning and tokenizing XML strings.
 This file contains simple, reusable helpers
@@ -6,7 +5,8 @@ that other controllers (formatter, validator, parser) can depend on.
 """
 
 from typing import List
-import file_io, pathlib
+import pathlib
+from .file_io import read_file
 
 
 def is_opening_tag(token: str) -> bool:
@@ -63,9 +63,10 @@ def tokenize(xml_string: str) -> List[str]:
 
 # p = pathlib.Path("C:/Users/youss/OneDrive/Desktop/Kolya/DSA/trial/Py_GUI/assets/samples/non_formatted.xml")
 #
-# txt = file_io.read_file(str(p))[1]
+# txt = read_file(str(p))[1]
 #
 # tokens = tokenize(txt)
 #
 # for token in tokens:
 #     print(token)
+

@@ -1,6 +1,6 @@
 import argparse
 import sys
-from src.controllers import xml_controller,data_controller
+from src.controllers import XMLController, DataController
 
 parser = argparse.ArgumentParser(description="use XML editor in CLI mode")
 commands =parser.add_subparsers(dest='command', help='Available functionalities',required=True)
@@ -34,8 +34,8 @@ decompress_arg.add_argument('-o',"--output",required=True,type=str,help='Path to
 if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-editor = xml_controller.XMLController()
-data_editor = data_controller.DataController()
+editor = XMLController()
+data_editor = DataController()
 args = parser.parse_args()
 if args.command == 'verify':
     if args.fix and args.output is None:

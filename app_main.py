@@ -2,8 +2,10 @@
 Application Manager - Controls the flow between windows
 """
 import sys
+
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
+from src.ui import ManualWindow
 
 
 class AppManager:
@@ -17,7 +19,7 @@ class AppManager:
         self.app.setFont(font)
 
         # Import here to avoid circular imports
-        from landing_window import LandingWindow
+        from src.ui import LandingWindow
 
         self.landing_window = LandingWindow()
         self.manual_window = None
@@ -32,7 +34,7 @@ class AppManager:
 
     def show_browse_mode(self):
         """Show browse mode window."""
-        from browse_window import BrowseWindow
+        from src.ui import BrowseWindow
 
         if self.browse_window is None:
             self.browse_window = BrowseWindow()
@@ -43,7 +45,6 @@ class AppManager:
 
     def show_manual_mode(self):
         """Show manual mode window."""
-        from manual_window import ManualWindow
 
         if self.manual_window is None:
             self.manual_window = ManualWindow()
@@ -68,3 +69,4 @@ class AppManager:
 if __name__ == '__main__':
     manager = AppManager()
     manager.run()
+
