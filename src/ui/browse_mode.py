@@ -324,8 +324,11 @@ class MainWindow(QMainWindow):
             self.log_message(f"ERROR: {message}")
             QMessageBox.critical(self, "Error", f"Failed to load file:\n{message}")
     
-    def validate_xml(self):
-        """Validate XML structure."""
+    def validate_xml(self)-> None:
+        """
+        Validate XML structure.
+        prints a valid\invalid massage for a give verifiable XML file
+        """
         self.log_message("User requested XML structure validation.")
         
         if not self.current_file_path:
@@ -497,7 +500,7 @@ class MainWindow(QMainWindow):
         
         self.log_message(f"Exporting data to JSON: {file_path}")
         
-        success, message, error = self.data_controller.export_to_json(file_path, self.current_file_path)
+        success, message, error = self.data_controller.export_to_json(file_path)
         
         if success:
             self.log_message(f"✓ {message}")

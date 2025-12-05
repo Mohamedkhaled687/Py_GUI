@@ -201,14 +201,12 @@ class DataController:
         except Exception as e:
             return False, {}, f"Statistics error: {str(e)}"
 
-    def export_to_json(self, file_path, current_file_path):
+    def export_to_json(self, file_path):
         """
         Export XML data to JSON format.
         
         Args:
             file_path: Path to save the JSON file
-            current_file_path: Path of the source XML file
-            
         Returns:
             tuple: (success: bool, message: str, error: str)
         """
