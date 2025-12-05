@@ -3,6 +3,7 @@ XML Controller - Handles XML parsing, validation, and formatting operations.
 """
 
 import xml.etree.ElementTree as ET
+from typing import Optional
 from xml.dom import minidom
 
 
@@ -15,7 +16,9 @@ class XMLController:
         self.current_file_path = ""
         self.user_record_count = 0
     
-    def parse_xml_file(self, file_path):
+    def parse_xml_file(self,
+                       file_path: str
+                       )-> tuple:
         """
         Parse an XML file and load the data.
         
@@ -38,7 +41,9 @@ class XMLController:
         except Exception as e:
             return False, f"Unexpected error: {str(e)}", 0
     
-    def validate_xml_structure(self, file_path):
+    def validate_xml_structure(self,
+                               file_path: str
+                               )-> tuple:
         """
         Validate XML structure.
         
@@ -46,7 +51,7 @@ class XMLController:
             file_path: Path to the XML file
             
         Returns:
-            tuple: (success: bool, details: list, error: str)
+            tuple: (success: bool, details: list, error: str | None)
         """
         try:
             tree = ET.parse(file_path)
@@ -55,9 +60,8 @@ class XMLController:
             users = root.findall('.//user')
             metadata = root.find('.//metadata')
             
-            details = []
-            details.append(f"✓ Root element: <{root.tag}>")
-            
+            details = [f"✓ Root element: <{root.tag}>"]
+
             if metadata is not None:
                 details.append("✓ Metadata section found")
             
@@ -72,13 +76,16 @@ class XMLController:
         except Exception as e:
             return False, [], f"Validation error: {str(e)}"
     
-    def format_xml_file(self, file_path):
+    def format_xml_file(self,
+                        file_path: str,
+                        dest_path: Optional[str] = None
+                        )-> tuple:
         """
         Format/prettify an XML file.
         
         Args:
             file_path: Path to the XML file
-            
+            dest_path: destination path for saving the XML
         Returns:
             tuple: (success: bool, message: str)
         """
@@ -98,9 +105,11 @@ class XMLController:
             elif 'encoding=' not in lines[0]:
                 lines[0] = '<?xml version="1.0" encoding="UTF-8"?>'
             formatted_xml = '\n'.join(lines)
-            
-            # Save the formatted XML back to the file
-            with open(file_path, 'w', encoding='utf-8') as f:
+
+            if dest_path is None or "":
+                dest_path = file_path
+            # Save the formatted XML to destination path
+            with open(dest_path, 'w', encoding='utf-8') as f:
                 f.write(formatted_xml)
             
             # Reload the XML data
@@ -114,7 +123,7 @@ class XMLController:
         except Exception as e:
             return False, f"Failed to format XML: {str(e)}"
     
-    def read_xml_file_content(self, file_path):
+    def read_xml_file_content(self, file_path)-> tuple:
         """
         Read XML file content as text.
         
