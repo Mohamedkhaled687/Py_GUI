@@ -20,8 +20,8 @@ class AppManager:
         from landing_window import LandingWindow
 
         self.landing_window = LandingWindow()
-        self.browse_window = None
         self.manual_window = None
+        self.browse_window = None
 
         # Connect navigation signals
         self.landing_window.browse_clicked.connect(self.show_browse_mode)
