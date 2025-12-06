@@ -2,10 +2,11 @@
 Browse Mode Window - Load XML from file browser
 """
 from datetime import datetime
+from typing import Optional, Dict, List, Tuple, Any
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                            QPushButton, QTextEdit, QLineEdit, QFileDialog,
                            QMessageBox, QLabel)
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QSize
 
 # Controller imports
 from ..controllers import XMLController, DataController, GraphController
@@ -19,30 +20,29 @@ from .graph_visualization_window import GraphVisualizationWindow
 class BrowseWindow(QMainWindow):
     """Browse mode window for loading XML from files."""
 
-    """Base class for XML operation windows with shared functionality."""
-
     back_clicked = Signal()
 
-    def __init__(self, window_title="🌐 SocialNet XML Parser", mode_name="XML Mode"):
+    def __init__(self, window_title: str = "🌐 SocialNet XML Parser", mode_name: str = "XML Mode") -> None:
         super().__init__()
 
         # Initialize controllers
-        self.xml_controller = XMLController()
-        self.data_controller = DataController()
-        self.graph_controller = GraphController()
+        self.xml_controller: XMLController = XMLController()
+        self.data_controller: DataController = DataController()
+        self.graph_controller: GraphController = GraphController()
 
-        self.current_file_path = ""
-        self.file_path_edit = None
-        self.user_record_count = 0
-        self.window_title = window_title
-        self.mode_name = mode_name
+        self.current_file_path: str = ""
+        self.file_path_edit: Optional[QLineEdit] = None
+        self.result_text_edit: Optional[QTextEdit] = None
+        self.user_record_count: int = 0
+        self.window_title: str = window_title
+        self.mode_name: str = mode_name
 
         self.setup_ui()
         self.apply_stylesheet()
         self.log_message(f"{mode_name} initialized.")
         self.log_message("Ready to load XML file.")
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Set up the user interface."""
         self.setWindowTitle(self.window_title)
         self.setMinimumSize(1200, 700)
@@ -202,7 +202,7 @@ class BrowseWindow(QMainWindow):
 
         sub_layout.addWidget(ops_widget)
 
-    def apply_stylesheet(self):
+    def apply_stylesheet(self) -> None:
         """Apply modern stylesheet matching landing page."""
         self.setStyleSheet("""
             QMainWindow {
@@ -328,12 +328,13 @@ class BrowseWindow(QMainWindow):
             }
         """)
 
-    def log_message(self, message):
+    def log_message(self, message: str) -> None:
         """Log a message to the operation log."""
         timestamp = datetime.now().strftime("[%H:%M:%S]")
-        self.result_text_edit.append(f"{timestamp} {message}")
+        if self.result_text_edit:
+            self.result_text_edit.append(f"{timestamp} {message}")
 
-    def browse_file(self):
+    def browse_file(self) -> None:
         """Handle file browsing."""
         self.log_message("User clicked Browse button.")
         file_path, _ = QFileDialog.getOpenFileName(
@@ -349,7 +350,7 @@ class BrowseWindow(QMainWindow):
         else:
             self.log_message("User cancelled file selection.")
 
-    def upload_and_parse(self):
+    def upload_and_parse(self) -> None:
         """Handle file upload and parsing."""
         file_path = self.file_path_edit.text()
         if not file_path:
@@ -386,7 +387,7 @@ class BrowseWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to load file:\n{message}")
 
     # Operation methods - Connect to controllers
-    def validate_xml(self):
+    def validate_xml(self) -> None:
         """Validate XML structure."""
         if not self.current_file_path:
             self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
@@ -415,7 +416,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Validation failed: {error}")
             QMessageBox.critical(self, "Validation Failed", f"XML validation failed:\n{error}")
 
-    def parse_user_data(self):
+    def parse_user_data(self) -> None:
         """Parse user data and show statistics."""
         if not self.data_controller or not self.data_controller.xml_data:
             self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
@@ -449,7 +450,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Parse failed: {error}")
             QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
 
-    def check_for_errors(self):
+    def check_for_errors(self) -> None:
         """Check for data integrity issues."""
         if not self.data_controller or not self.data_controller.xml_data:
             self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
@@ -494,7 +495,7 @@ class BrowseWindow(QMainWindow):
 
             QMessageBox.warning(self, "Issues Found", result_text)
 
-    def format_xml(self):
+    def format_xml(self) -> None:
         """Format/prettify XML file."""
         if not self.current_file_path:
             self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
@@ -517,7 +518,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Format failed: {message}")
             QMessageBox.critical(self, "Format Failed", f"Failed to format XML:\n{message}")
 
-    def view_code(self):
+    def view_code(self) -> None:
         """View XML file content in code viewer."""
         if not self.current_file_path:
             self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
@@ -545,7 +546,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Failed to read file: {error}")
             QMessageBox.critical(self, "Read Failed", f"Failed to read file:\n{error}")
 
-    def visualize_network(self):
+    def visualize_network(self) -> None:
         """Visualize network graph."""
         if not self.graph_controller or not self.graph_controller.xml_data:
             self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
@@ -569,7 +570,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Graph build failed: {error}")
             QMessageBox.critical(self, "Graph Build Failed", f"Failed to build graph:\n{error}")
 
-    def show_user_stats(self):
+    def show_user_stats(self) -> None:
         """Show user statistics."""
         if not self.data_controller or not self.data_controller.xml_data:
             self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
@@ -603,7 +604,7 @@ class BrowseWindow(QMainWindow):
             self.log_message(f"✗ Statistics calculation failed: {error}")
             QMessageBox.critical(self, "Statistics Failed", f"Failed to calculate statistics:\n{error}")
 
-    def export_to_json(self):
+    def export_to_json(self) -> None:
         """Export XML data to JSON format."""
         if not self.data_controller or not self.data_controller.xml_data:
             self.log_message("ERROR: No data loaded. Please upload and parse a file first.")

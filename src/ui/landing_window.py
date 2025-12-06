@@ -3,27 +3,28 @@
 Landing Window - Initial window for selecting input method
 """
 import random
+from typing import Optional, Dict, Any, List
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QLabel, QPushButton, QGraphicsDropShadowEffect)
 from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QPainter, QColor, QLinearGradient, QRadialGradient, QPen
+from PySide6.QtGui import QPainter, QColor, QLinearGradient, QRadialGradient, QPen, QPaintEvent, QResizeEvent
 
 
 class AnimatedBackground(QWidget):
     """Widget that draws animated network nodes and connections."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.nodes = []
+        self.nodes: List[Dict[str, Any]] = []
         self.init_nodes()
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         # Setup animation timer
-        self.timer = QTimer(self)
+        self.timer: QTimer = QTimer(self)
         self.timer.timeout.connect(self.update)
         self.timer.start(50)  # Update every 50ms
 
-    def init_nodes(self):
+    def init_nodes(self) -> None:
         """Initialize random nodes for the network animation."""
         for _ in range(200):
             node = {
@@ -85,11 +86,11 @@ class AnimatedBackground(QWidget):
 class NetworkIcon(QWidget):
     """Custom widget to draw the network icon."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.setFixedSize(120, 120)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -138,7 +139,7 @@ class LandingWindow(QMainWindow):
     browse_clicked = Signal()
     manual_clicked = Signal()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("🌐 SocialNet XML Data Editor")
         self.setMinimumSize(1200, 700)
@@ -296,6 +297,6 @@ class LandingWindow(QMainWindow):
         content_layout.addWidget(card)
         main_layout.addWidget(content_widget)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         self.bg.setGeometry(0, 0, self.width(), self.height())

@@ -3,19 +3,21 @@ Data Controller - Handles data operations like parsing, statistics, error checki
 """
 
 import json
+import xml.etree.ElementTree as ET
+from typing import Optional, Tuple, Dict, List, Any
 
 
 class DataController:
     """Controller for data-related operations."""
 
-    def __init__(self, xml_data=None):
-        self.xml_data = xml_data
+    def __init__(self, xml_data: Optional[ET.Element] = None) -> None:
+        self.xml_data: Optional[ET.Element] = xml_data
 
-    def set_xml_data(self, xml_data):
+    def set_xml_data(self, xml_data: Optional[ET.Element]) -> None:
         """Set the XML data root element."""
         self.xml_data = xml_data
 
-    def parse_user_data(self):
+    def parse_user_data(self) -> Tuple[bool, Dict[str, Any], Optional[str]]:
         """
         Parse user data and return statistics.
         
@@ -72,7 +74,7 @@ class DataController:
         except Exception as e:
             return False, {}, f"Error while parsing user data: {str(e)}"
 
-    def check_for_errors(self):
+    def check_for_errors(self) -> Tuple[bool, List[str], List[str], Optional[str]]:
         """
         Check for data integrity issues.
         
@@ -143,7 +145,7 @@ class DataController:
         except Exception as e:
             return False, [], [], f"Error checking failed: {str(e)}"
 
-    def calculate_statistics(self):
+    def calculate_statistics(self) -> Tuple[bool, Dict[str, Any], Optional[str]]:
         """
         Calculate user statistics.
         
@@ -201,7 +203,7 @@ class DataController:
         except Exception as e:
             return False, {}, f"Statistics error: {str(e)}"
 
-    def export_to_json(self, file_path):
+    def export_to_json(self, file_path: str) -> Tuple[bool, str, Optional[str]]:
         """
         Export XML data to JSON format.
         

@@ -2,7 +2,9 @@
 Code Viewer Window - UI component for displaying code in a read-only window.
 """
 
+from typing import Optional
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit
+from PySide6.QtCore import QSize
 from PySide6.QtGui import QFont
 import re
 
@@ -10,13 +12,14 @@ import re
 class CodeViewerWindow(QWidget):
     """Window for viewing code in read-only mode."""
     
-    def __init__(self, code_text, main_window_size, parent=None):
+    def __init__(self, code_text: str, main_window_size: QSize, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.code_text = code_text
-        self.main_window_size = main_window_size
+        self.code_text: str = code_text
+        self.main_window_size: QSize = main_window_size
+        self.code_editor: Optional[QTextEdit] = None
         self.setup_ui()
     
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         self.setWindowTitle("Code (Read-only) Window")
         # Set the same size as the main window
         self.resize(self.main_window_size)
@@ -102,7 +105,7 @@ class CodeViewerWindow(QWidget):
         # Apply syntax highlighting (basic)
         self.apply_syntax_highlighting()
     
-    def apply_syntax_highlighting(self):
+    def apply_syntax_highlighting(self) -> None:
         """Apply syntax highlighting to the code."""
         # Get the text
         text = self.code_editor.toPlainText()

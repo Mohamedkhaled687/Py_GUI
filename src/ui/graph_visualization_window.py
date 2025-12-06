@@ -2,8 +2,9 @@
 Graph Visualization Window - UI component for displaying network graphs.
 """
 
+from typing import Optional, Dict, List, Tuple
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 import matplotlib
 matplotlib.use('QtAgg')
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -14,15 +15,18 @@ import networkx as nx
 class GraphVisualizationWindow(QWidget):
     """Window for visualizing network graphs."""
     
-    def __init__(self, nodes, edges, main_window_size, parent=None):
+    def __init__(self, nodes: Dict[str, str], edges: List[Tuple[str, str]], 
+                 main_window_size: QSize, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.nodes = nodes
-        self.edges = edges
-        self.main_window_size = main_window_size
+        self.nodes: Dict[str, str] = nodes
+        self.edges: List[Tuple[str, str]] = edges
+        self.main_window_size: QSize = main_window_size
+        self.figure: Optional[Figure] = None
+        self.canvas: Optional[FigureCanvas] = None
         self.setup_ui()
         self.draw_graph()
     
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         self.setWindowTitle("Social Network Graph Visualization")
         # Set the same size as the main window
         self.resize(self.main_window_size)
@@ -73,7 +77,7 @@ class GraphVisualizationWindow(QWidget):
         layout.addWidget(title_bar)
         layout.addWidget(self.canvas)
     
-    def draw_graph(self):
+    def draw_graph(self) -> None:
         """Draw the directed graph using networkx and matplotlib."""
         # Clear the figure
         self.figure.clear()

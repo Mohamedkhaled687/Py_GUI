@@ -3,22 +3,20 @@ XML Controller - Handles XML parsing, validation, and formatting operations.
 """
 
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import Optional, Tuple, List
 from xml.dom import minidom
 
 
 class XMLController:
     """Controller for XML-related operations."""
     
-    def __init__(self):
-        self.xml_tree = None
-        self.xml_data = None
-        self.current_file_path = ""
-        self.user_record_count = 0
+    def __init__(self) -> None:
+        self.xml_tree: Optional[ET.ElementTree] = None
+        self.xml_data: Optional[ET.Element] = None
+        self.current_file_path: str = ""
+        self.user_record_count: int = 0
     
-    def parse_xml_file(self,
-                       file_path: str
-                       )-> tuple:
+    def parse_xml_file(self, file_path: str) -> Tuple[bool, str, int]:
         """
         Parse an XML file and load the data.
         
@@ -41,9 +39,7 @@ class XMLController:
         except Exception as e:
             return False, f"Unexpected error: {str(e)}", 0
     
-    def validate_xml_structure(self,
-                               file_path: str
-                               )-> tuple:
+    def validate_xml_structure(self, file_path: str) -> Tuple[bool, List[str], Optional[str]]:
         """
         Validate XML structure.
         
@@ -76,10 +72,7 @@ class XMLController:
         except Exception as e:
             return False, [], f"Validation error: {str(e)}"
     
-    def format_xml_file(self,
-                        file_path: str,
-                        dest_path: Optional[str] = None
-                        )-> tuple:
+    def format_xml_file(self, file_path: str, dest_path: Optional[str] = None) -> Tuple[bool, str]:
         """
         Format/prettify an XML file.
         
@@ -123,7 +116,7 @@ class XMLController:
         except Exception as e:
             return False, f"Failed to format XML: {str(e)}"
     
-    def read_xml_file_content(self, file_path)-> tuple:
+    def read_xml_file_content(self, file_path: str) -> Tuple[bool, str, Optional[str]]:
         """
         Read XML file content as text.
         
@@ -142,11 +135,11 @@ class XMLController:
         except Exception as e:
             return False, "", f"Error reading file: {str(e)}"
     
-    def get_xml_data(self):
+    def get_xml_data(self) -> Optional[ET.Element]:
         """Get the current XML data root element."""
         return self.xml_data
     
-    def get_xml_tree(self):
+    def get_xml_tree(self) -> Optional[ET.ElementTree]:
         """Get the current XML tree."""
         return self.xml_tree
 

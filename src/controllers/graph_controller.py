@@ -3,19 +3,20 @@ Graph Controller - Handles graph building and network analysis operations.
 """
 
 import xml.etree.ElementTree as ET
+from typing import Optional, Tuple, Dict, List
 
 
 class GraphController:
     """Controller for graph-related operations."""
     
-    def __init__(self, xml_data=None):
-        self.xml_data = xml_data
+    def __init__(self, xml_data: Optional[ET.Element] = None) -> None:
+        self.xml_data: Optional[ET.Element] = xml_data
     
-    def set_xml_data(self, xml_data):
+    def set_xml_data(self, xml_data: Optional[ET.Element]) -> None:
         """Set the XML data root element."""
         self.xml_data = xml_data
     
-    def build_graph(self):
+    def build_graph(self) -> Tuple[bool, Dict[str, str], List[Tuple[str, str]], Optional[str]]:
         """
         Build graph structure from XML data.
         
