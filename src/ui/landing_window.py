@@ -25,10 +25,10 @@ class AnimatedBackground(QWidget):
 
     def init_nodes(self):
         """Initialize random nodes for the network animation."""
-        for _ in range(100):
+        for _ in range(200):
             node = {
-                'x': random.randint(0, 1000),
-                'y': random.randint(0, 800),
+                'x': random.randint(0, 1200),
+                'y': random.randint(0, 700),
                 'vx': random.uniform(-0.5, 0.5),
                 'vy': random.uniform(-0.5, 0.5),
                 'color': random.choice([
@@ -140,7 +140,7 @@ class LandingWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SocialNet XML Data Editor")
+        self.setWindowTitle("🌐 SocialNet XML Data Editor")
         self.setMinimumSize(1200, 700)
 
         # Create central widget
