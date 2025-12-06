@@ -188,7 +188,7 @@ class LandingWindow(QMainWindow):
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet("""
             QLabel {
-                color: #ffffff;
+                color: rgba(100, 230, 255, 255);
                 font-size: 36px;
                 font-weight: bold;
                 background: transparent;
@@ -288,6 +288,7 @@ class LandingWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 font-size: 12px;
+                border: transparent;
             }
         """)
         card_layout.addWidget(version)

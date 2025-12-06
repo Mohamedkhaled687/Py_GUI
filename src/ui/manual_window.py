@@ -31,6 +31,7 @@ class ManualWindow(QMainWindow):
         self.graph_controller = GraphController()
 
         self.current_file_path = ""
+        self.file_path_edit = None
         self.user_record_count = 0
         self.window_title = window_title
         self.mode_name = mode_name
@@ -86,14 +87,14 @@ class ManualWindow(QMainWindow):
         text_layout.setSpacing(10)
 
         text_title_layout = QHBoxLayout()
-        text_title_layout.setContentsMargins(20, 20, 20, 20)
+        text_title_layout.setContentsMargins(5, 5, 5, 5)
         text_title_layout.setSpacing(40)
 
         text_title = QLabel("Enter XML Data")
         text_title.setStyleSheet("""
             QLabel {
                 color: rgba(100, 230, 255, 255);
-                font-size: 18px;
+                font-size: 22px;
                 font-weight: bold;
             }
         """)
@@ -109,36 +110,50 @@ class ManualWindow(QMainWindow):
 
         text_layout.addLayout(text_title_layout)
 
-        text_path_edit = QTextEdit()
-        text_path_edit.setPlaceholderText("Enter your Social Network XML Data here")
-        text_path_edit.setObjectName("textInput")
-        text_path_edit.setMinimumHeight(40)
+        text_data = QTextEdit()
+        text_data.setPlaceholderText("Enter your Social Network XML Data here")
+        text_data.setObjectName("textInput")
+        text_data.setMinimumHeight(40)
 
-        text_layout.addWidget(text_path_edit)
+        text_layout.addWidget(text_data, 1)
         left_layout.addWidget(text_widget)
 
         # Result (Read-Only) area - to be refactored
-        log_widget = QWidget()
-        log_widget.setObjectName("logPanel")
-        log_layout = QVBoxLayout(log_widget)
-        log_layout.setContentsMargins(20, 20, 20, 20)
-        log_layout.setSpacing(15)
+        result_widget = QWidget()
+        result_widget.setObjectName("resultPanel")
+        result_layout = QVBoxLayout(result_widget)
+        result_layout.setContentsMargins(20, 20, 20, 20)
+        result_layout.setSpacing(5)
 
-        log_title = QLabel("Operation Log")
-        log_title.setStyleSheet("""
+        result_title = QLabel("Operation Result")
+        result_title.setStyleSheet("""
             QLabel {
                 color: rgba(100, 230, 255, 255);
-                font-size: 18px;
+                font-size: 22px;
                 font-weight: bold;
             }
         """)
-        log_layout.addWidget(log_title)
 
-        self.log_text_edit = QTextEdit()
-        self.log_text_edit.setReadOnly(True)
-        self.log_text_edit.setObjectName("logText")
-        log_layout.addWidget(self.log_text_edit)
-        left_layout.addWidget(log_widget)
+        save_btn = QPushButton("⬆ Save")
+        save_btn.setObjectName("saveBtn")
+        save_btn.setMinimumHeight(40)
+        save_btn.setMaximumWidth(150)
+        # save_btn.clicked.connect(self.save_and_parse)
+
+        result_title_layout = QHBoxLayout()
+        result_title_layout.setContentsMargins(5, 5, 5, 5)
+        result_title_layout.setSpacing(40)
+
+        result_title_layout.addWidget(result_title)
+        result_title_layout.addWidget(save_btn)
+
+        result_layout.addLayout(result_title_layout)
+
+        self.result_text_edit = QTextEdit()
+        self.result_text_edit.setReadOnly(True)
+        self.result_text_edit.setObjectName("resultText")
+        result_layout.addWidget(self.result_text_edit, 1)
+        left_layout.addWidget(result_widget)
 
         sub_layout.addWidget(left_widget)
 
@@ -153,7 +168,7 @@ class ManualWindow(QMainWindow):
         ops_title.setStyleSheet("""
             QLabel {
                 color: rgba(100, 230, 255, 255);
-                font-size: 18px;
+                font-size: 20px;
                 font-weight: bold;
             }
         """)
@@ -192,12 +207,13 @@ class ManualWindow(QMainWindow):
                                            stop:1 rgba(15, 25, 40, 255));
             }
 
-            #textPanel, #logPanel, #opsPanel {
+            #textPanel, #resultPanel, #opsPanel {
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                            stop:0 rgba(20, 35, 55, 200),
                                            stop:1 rgba(15, 25, 45, 200));
                 border: 2px solid rgba(100, 150, 200, 100);
                 border-radius: 15px;
+                
             }
 
             #textInput {
@@ -208,7 +224,7 @@ class ManualWindow(QMainWindow):
                 font-size: 13px;
             }
 
-            #logText {
+            #resultText {
                 background-color: rgba(15, 20, 35, 180);
                 border: 1px solid rgba(80, 120, 160, 120);
                 border-radius: 8px;
@@ -253,6 +269,23 @@ class ManualWindow(QMainWindow):
                                            stop:1 rgba(80, 160, 240, 230));
             }
 
+            #saveBtn {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                           stop:0 rgba(50, 150, 255, 200),
+                                           stop:1 rgba(80, 180, 255, 200));
+                border: 2px solid rgba(100, 200, 255, 255);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            #saveBtn:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                           stop:0 rgba(70, 170, 255, 230),
+                                           stop:1 rgba(100, 200, 255, 230));
+            }
+            
             #uploadBtn {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
                                            stop:0 rgba(50, 150, 255, 200),
@@ -294,7 +327,7 @@ class ManualWindow(QMainWindow):
     def log_message(self, message):
         """Log a message to the operation log."""
         timestamp = datetime.now().strftime("[%H:%M:%S]")
-        self.log_text_edit.append(f"{timestamp} {message}")
+        self.result_text_edit.append(f"{timestamp} {message}")
 
     def browse_file(self):
         """Handle file browsing."""
