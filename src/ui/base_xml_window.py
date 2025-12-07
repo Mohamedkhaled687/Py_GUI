@@ -406,7 +406,7 @@ class BaseXMLWindow(QMainWindow):
             QMessageBox.critical(self, "Error", "XML controller not available.")
             return
 
-        self.output_text = file_io.pretty_format(xml=self.input_text)
+        # self.output_text = file_io.pretty_format(xml=self.input_text)
         QMessageBox.information(self, "Success", "Successfully formated\n press ok to reveal result")
 
     def view_code(self) -> None:
