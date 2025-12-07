@@ -39,6 +39,27 @@ class XMLController:
         except Exception as e:
             return False, f"Unexpected error: {str(e)}", 0
     
+    def parse_xml_string(self, xml_string: str) -> Tuple[bool, str, int]:
+        """
+        Parse an XML string and load the data.
+        
+        Args:
+            xml_string: XML content as string
+            
+        Returns:
+            tuple: (success: bool, message: str, user_count: int)
+        """
+        try:
+            self.xml_data = ET.fromstring(xml_string)
+            self.xml_tree = ET.ElementTree(self.xml_data)
+            self.current_file_path = ""  # No file path for string input
+            self.user_record_count = len(self.xml_data.findall('.//user'))
+            return True, f"XML validated successfully. Found {self.user_record_count} user records.", self.user_record_count
+        except ET.ParseError as e:
+            return False, f"XML parsing failed: {str(e)}", 0
+        except Exception as e:
+            return False, f"Unexpected error: {str(e)}", 0
+    
     def validate_xml_structure(self, file_path: str) -> Tuple[bool, List[str], Optional[str]]:
         """
         Validate XML structure.
