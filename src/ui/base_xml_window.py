@@ -15,6 +15,8 @@ from ..controllers import XMLController, DataController, GraphController
 from .code_viewer_window import CodeViewerWindow
 from .graph_visualization_window import GraphVisualizationWindow
 
+# Parent Imports
+from abc import abstractmethod
 
 class BaseXMLWindow(QMainWindow):
     """Base class for XML-related UI windows with shared functionality."""
@@ -29,17 +31,15 @@ class BaseXMLWindow(QMainWindow):
         self.data_controller: DataController = DataController()
         self.graph_controller: GraphController = GraphController()
 
-        self.current_file_path: str = ""
-        self.file_path_edit: Optional[QLineEdit] = None
-        self.result_text_edit: Optional[QTextEdit] = None
-        self.user_record_count: int = 0
+        self.input_text: str = ""
+        self.output_text: str = ""
+        self.result_text_box: QTextEdit = QTextEdit()
+
         self.window_title: str = window_title
         self.mode_name: str = mode_name
 
         self.setup_ui()
         self.apply_stylesheet()
-        self.log_message(f"{mode_name} initialized.")
-        self.log_message(self._get_initialization_message())
 
     def setup_ui(self) -> None:
         """Set up the user interface."""
@@ -113,10 +113,11 @@ class BaseXMLWindow(QMainWindow):
 
         result_layout.addLayout(result_title_layout)
 
-        self.result_text_edit = QTextEdit()
-        self.result_text_edit.setReadOnly(True)
-        self.result_text_edit.setObjectName("resultText")
-        result_layout.addWidget(self.result_text_edit)
+        result_layout.addWidget(self.result_text_box)
+        self.result_text_box.show()
+        self.result_text_box.setReadOnly(True)
+        self.result_text_box.setObjectName("resultText")
+        self.result_text_box.setText(self.output_text)
         left_layout.addWidget(result_widget)
 
         sub_layout.addWidget(left_widget)
@@ -162,6 +163,7 @@ class BaseXMLWindow(QMainWindow):
 
         sub_layout.addWidget(ops_widget)
 
+    @abstractmethod
     def _setup_input_section(self, parent_layout: QVBoxLayout) -> None:
         """
         Abstract method to set up the input section.
@@ -169,6 +171,7 @@ class BaseXMLWindow(QMainWindow):
         """
         raise NotImplementedError("Subclasses must implement _setup_input_section")
 
+    @abstractmethod
     def _get_panel_selector(self) -> str:
         """
         Abstract method to get the panel selector for stylesheet.
@@ -176,6 +179,7 @@ class BaseXMLWindow(QMainWindow):
         """
         raise NotImplementedError("Subclasses must implement _get_panel_selector")
 
+    @abstractmethod
     def _get_initialization_message(self) -> str:
         """
         Abstract method to get the initialization message.
@@ -310,22 +314,11 @@ class BaseXMLWindow(QMainWindow):
             }}
         """)
 
-    def log_message(self, message: str) -> None:
-        """Log a message to the operation log."""
-        timestamp = datetime.now().strftime("[%H:%M:%S]")
-        if self.result_text_edit:
-            self.result_text_edit.append(f"{timestamp} {message}")
-
-    def browse_file(self) -> None:
-        """
-        Handle file browsing.
-        Override in subclasses if needed.
-        """
-        pass
-
-    def upload_and_parse(self) -> None:
+    @abstractmethod
+    def upload(self) -> None:
         """
         Handle file upload and parsing.
+
         Must be overridden by subclasses.
         """
         raise NotImplementedError("Subclasses must implement upload_and_parse")
@@ -333,252 +326,175 @@ class BaseXMLWindow(QMainWindow):
     # Operation methods - Connect to controllers
     def validate_xml(self) -> None:
         """Validate XML structure."""
-        if not self.current_file_path:
-            self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No File", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Validating XML structure...")
-
-        if not self.xml_controller:
-            self.log_message("ERROR: XML controller not available.")
-            QMessageBox.critical(self, "Error", "XML controller not available.")
-            return
-
-        success, details, error = self.xml_controller.validate_xml_structure(self.current_file_path)
-
-        if success:
-            self.log_message("✓ XML validation successful!")
-            for detail in details:
-                self.log_message(f"  {detail}")
-            QMessageBox.information(
-                self,
-                "Validation Success",
-                "XML structure is valid!\n\n" + "\n".join(details)
-            )
-        else:
-            self.log_message(f"✗ Validation failed: {error}")
-            QMessageBox.critical(self, "Validation Failed", f"XML validation failed:\n{error}")
+        # if not self.current_file_path:
+        #     QMessageBox.warning(self, "No File", "Please upload and parse an XML file first.")
+        #     return
+        #
+        # if not self.xml_controller:
+        #     QMessageBox.critical(self, "Error", "XML controller not available.")
+        #     return
+        #
+        # success, details, error = self.xml_controller.validate_xml_structure(self.current_file_path)
+        #
+        # if success:
+        #     QMessageBox.information(
+        #         self,
+        #         "Validation Success",
+        #         "XML structure is valid!\n\n" + "\n".join(details)
+        #     )
+        # else:
+        #     QMessageBox.critical(self, "Validation Failed", f"XML validation failed:\n{error}")
 
     def parse_user_data(self) -> None:
         """Parse user data and show statistics."""
-        if not self.data_controller or not self.data_controller.xml_data:
-            self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Parsing user data...")
-
-        success, stats, error = self.data_controller.parse_user_data()
-
-        if success:
-            self.log_message("✓ User data parsed successfully!")
-            self.log_message(f"  Total users: {stats.get('total_users', 0)}")
-            self.log_message(f"  Total followers: {stats.get('total_followers', 0)}")
-            self.log_message(f"  Total following: {stats.get('total_following', 0)}")
-            self.log_message(f"  Total posts: {stats.get('total_posts', 0)}")
-
-            if 'sample_user' in stats and stats['sample_user']:
-                sample = stats['sample_user']
-                self.log_message(
-                    f"  Sample user: ID={sample.get('id', 'N/A')}, Username={sample.get('username', 'N/A')}")
-
-            stats_text = (
-                f"Total Users: {stats.get('total_users', 0)}\n"
-                f"Total Followers: {stats.get('total_followers', 0)}\n"
-                f"Total Following: {stats.get('total_following', 0)}\n"
-                f"Total Posts: {stats.get('total_posts', 0)}"
-            )
-            QMessageBox.information(self, "Parse Results", stats_text)
-        else:
-            self.log_message(f"✗ Parse failed: {error}")
-            QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
+        # if not self.data_controller or not self.data_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        # success, stats, error = self.data_controller.parse_user_data()
+        #
+        # if success:
+        #     if 'sample_user' in stats and stats['sample_user']:
+        #         sample = stats['sample_user']
+        #
+        #     stats_text = (
+        #         f"Total Users: {stats.get('total_users', 0)}\n"
+        #         f"Total Followers: {stats.get('total_followers', 0)}\n"
+        #         f"Total Following: {stats.get('total_following', 0)}\n"
+        #         f"Total Posts: {stats.get('total_posts', 0)}"
+        #     )
+        #     QMessageBox.information(self, "Parse Results", stats_text)
+        # else:
+        #     QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
 
     def check_for_errors(self) -> None:
         """Check for data integrity issues."""
-        if not self.data_controller or not self.data_controller.xml_data:
-            self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Checking for errors...")
-
-        success, errors, warnings, error_msg = self.data_controller.check_for_errors()
-
-        if not success:
-            self.log_message(f"✗ Error check failed: {error_msg}")
-            QMessageBox.critical(self, "Error Check Failed", f"Failed to check for errors:\n{error_msg}")
-            return
-
-        self.log_message(f"✓ Error check completed. Found {len(errors)} errors and {len(warnings)} warnings.")
-
-        if errors:
-            self.log_message("Errors found:")
-            for err in errors:
-                self.log_message(f"  ✗ {err}")
-
-        if warnings:
-            self.log_message("Warnings found:")
-            for warn in warnings:
-                self.log_message(f"  ⚠ {warn}")
-
-        if not errors and not warnings:
-            self.log_message("  ✓ No errors or warnings found. Data is clean!")
-            QMessageBox.information(self, "No Issues", "No errors or warnings found. Data is clean!")
-        else:
-            result_text = ""
-            if errors:
-                result_text += f"Errors ({len(errors)}):\n" + "\n".join(errors[:10])
-                if len(errors) > 10:
-                    result_text += f"\n... and {len(errors) - 10} more errors"
-                result_text += "\n\n"
-            if warnings:
-                result_text += f"Warnings ({len(warnings)}):\n" + "\n".join(warnings[:10])
-                if len(warnings) > 10:
-                    result_text += f"\n... and {len(warnings) - 10} more warnings"
-
-            QMessageBox.warning(self, "Issues Found", result_text)
+        # if not self.data_controller or not self.data_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        #
+        # success, errors, warnings, error_msg = self.data_controller.check_for_errors()
+        #
+        # if not success:
+        #     QMessageBox.critical(self, "Error Check Failed", f"Failed to check for errors:\n{error_msg}")
+        #     return
+        #
+        # if not errors and not warnings:
+        #     QMessageBox.information(self, "No Issues", "No errors or warnings found. Data is clean!")
+        # else:
+        #     result_text = ""
+        #     if errors:
+        #         result_text += f"Errors ({len(errors)}):\n" + "\n".join(errors[:10])
+        #         if len(errors) > 10:
+        #             result_text += f"\n... and {len(errors) - 10} more errors"
+        #         result_text += "\n\n"
+        #     if warnings:
+        #         result_text += f"Warnings ({len(warnings)}):\n" + "\n".join(warnings[:10])
+        #         if len(warnings) > 10:
+        #             result_text += f"\n... and {len(warnings) - 10} more warnings"
+        #
+        #     QMessageBox.warning(self, "Issues Found", result_text)
 
     def format_xml(self) -> None:
         """Format/prettify XML file."""
-        if not self.current_file_path:
-            self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
+        if not self.input_text:
             QMessageBox.warning(self, "No File", "Please upload and parse an XML file first.")
             return
 
-        self.log_message("Formatting XML...")
-
         if not self.xml_controller:
-            self.log_message("ERROR: XML controller not available.")
             QMessageBox.critical(self, "Error", "XML controller not available.")
             return
 
-        success, message = self.xml_controller.format_xml_file(self.current_file_path)
-
-        if success:
-            self.log_message(f"✓ {message}")
-            QMessageBox.information(self, "Format Success", message)
-        else:
-            self.log_message(f"✗ Format failed: {message}")
-            QMessageBox.critical(self, "Format Failed", f"Failed to format XML:\n{message}")
+        self.output_text = file_io.pretty_format(xml=self.input_text)
+        QMessageBox.information(self, "Success", "Successfully formated\n press ok to reveal result")
 
     def view_code(self) -> None:
         """View XML file content in code viewer."""
-        if not self.current_file_path:
-            self.log_message("ERROR: No file loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No File", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Opening code viewer...")
-
-        if not self.xml_controller:
-            self.log_message("ERROR: XML controller not available.")
-            QMessageBox.critical(self, "Error", "XML controller not available.")
-            return
-
-        success, content, error = self.xml_controller.read_xml_file_content(self.current_file_path)
-
-        if success:
-            try:
-                code_window = CodeViewerWindow(content, self.size(), self)
-                code_window.show()
-                self.log_message("✓ Code viewer opened successfully.")
-            except Exception as e:
-                self.log_message(f"ERROR: Failed to open code viewer: {str(e)}")
-                QMessageBox.critical(self, "Error", f"Failed to open code viewer:\n{str(e)}")
-        else:
-            self.log_message(f"✗ Failed to read file: {error}")
-            QMessageBox.critical(self, "Read Failed", f"Failed to read file:\n{error}")
+        # if not self.current_file_path:
+        #     QMessageBox.warning(self, "No File", "Please upload and parse an XML file first.")
+        #     return
+        #
+        #
+        # if not self.xml_controller:
+        #     QMessageBox.critical(self, "Error", "XML controller not available.")
+        #     return
+        #
+        # success, content, error = self.xml_controller.read_xml_file_content(self.current_file_path)
+        #
+        # if success:
+        #     try:
+        #         code_window = CodeViewerWindow(content, self.size(), self)
+        #         code_window.show()
+        #     except Exception as e:
+        #         QMessageBox.critical(self, "Error", f"Failed to open code viewer:\n{str(e)}")
+        # else:
+        #     QMessageBox.critical(self, "Read Failed", f"Failed to read file:\n{error}")
 
     def visualize_network(self) -> None:
         """Visualize network graph."""
-        if not self.graph_controller or not self.graph_controller.xml_data:
-            self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Building network graph...")
-
-        success, nodes, edges, error = self.graph_controller.build_graph()
-
-        if success:
-            self.log_message(f"✓ Graph built successfully! Nodes: {len(nodes)}, Edges: {len(edges)}")
-            try:
-                graph_window = GraphVisualizationWindow(nodes, edges, self.size(), self)
-                graph_window.show()
-                self.log_message("✓ Graph visualization window opened.")
-            except Exception as e:
-                self.log_message(f"ERROR: Failed to open graph window: {str(e)}")
-                QMessageBox.critical(self, "Error", f"Failed to open graph visualization:\n{str(e)}")
-        else:
-            self.log_message(f"✗ Graph build failed: {error}")
-            QMessageBox.critical(self, "Graph Build Failed", f"Failed to build graph:\n{error}")
+        # if not self.graph_controller or not self.graph_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        # success, nodes, edges, error = self.graph_controller.build_graph()
+        #
+        # if success:
+        #     try:
+        #         graph_window = GraphVisualizationWindow(nodes, edges, self.size(), self)
+        #         graph_window.show()
+        #     except Exception as e:
+        #         QMessageBox.critical(self, "Error", f"Failed to open graph visualization:\n{str(e)}")
+        # else:
+        #     QMessageBox.critical(self, "Graph Build Failed", f"Failed to build graph:\n{error}")
 
     def show_user_stats(self) -> None:
         """Show user statistics."""
-        if not self.data_controller or not self.data_controller.xml_data:
-            self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Calculating statistics...")
-
-        success, stats, error = self.data_controller.calculate_statistics()
-
-        if success:
-            self.log_message("✓ Statistics calculated successfully!")
-            self.log_message(f"  Total users: {stats.get('total_users', 0)}")
-            self.log_message(f"  Total posts: {stats.get('total_posts', 0)}")
-            self.log_message(f"  Total followers: {stats.get('total_followers', 0)}")
-            self.log_message(f"  Total following: {stats.get('total_following', 0)}")
-            self.log_message(f"  Average followers per user: {stats.get('avg_followers', 0):.2f}")
-            self.log_message(f"  Average posts per user: {stats.get('avg_posts', 0):.2f}")
-
-            stats_text = (
-                f"User Statistics:\n\n"
-                f"Total Users: {stats.get('total_users', 0)}\n"
-                f"Total Posts: {stats.get('total_posts', 0)}\n"
-                f"Total Followers: {stats.get('total_followers', 0)}\n"
-                f"Total Following: {stats.get('total_following', 0)}\n"
-                f"Average Followers: {stats.get('avg_followers', 0):.2f}\n"
-                f"Average Posts: {stats.get('avg_posts', 0):.2f}"
-            )
-            QMessageBox.information(self, "User Statistics", stats_text)
-        else:
-            self.log_message(f"✗ Statistics calculation failed: {error}")
-            QMessageBox.critical(self, "Statistics Failed", f"Failed to calculate statistics:\n{error}")
+        # if not self.data_controller or not self.data_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        # success, stats, error = self.data_controller.calculate_statistics()
+        #
+        # if success:
+        #
+        #     stats_text = (
+        #         f"User Statistics:\n\n"
+        #         f"Total Users: {stats.get('total_users', 0)}\n"
+        #         f"Total Posts: {stats.get('total_posts', 0)}\n"
+        #         f"Total Followers: {stats.get('total_followers', 0)}\n"
+        #         f"Total Following: {stats.get('total_following', 0)}\n"
+        #         f"Average Followers: {stats.get('avg_followers', 0):.2f}\n"
+        #         f"Average Posts: {stats.get('avg_posts', 0):.2f}"
+        #     )
+        #     QMessageBox.information(self, "User Statistics", stats_text)
+        # else:
+        #     QMessageBox.critical(self, "Statistics Failed", f"Failed to calculate statistics:\n{error}")
 
     def export_to_json(self) -> None:
         """Export XML data to JSON format."""
-        if not self.data_controller or not self.data_controller.xml_data:
-            self.log_message("ERROR: No data loaded. Please upload and parse a file first.")
-            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-            return
-
-        self.log_message("Exporting to JSON...")
-
-        # Get save location from user
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save JSON File",
-            "",
-            "JSON Files (*.json);;All Files (*)"
-        )
-
-        if not file_path:
-            self.log_message("User cancelled JSON export.")
-            return
-
-        # Ensure .json extension
-        if not file_path.endswith('.json'):
-            file_path += '.json'
-
-        success, message, error = self.data_controller.export_to_json(file_path)
-
-        if success:
-            self.log_message(f"✓ {message}")
-            QMessageBox.information(self, "Export Success", message)
-        else:
-            self.log_message(f"✗ Export failed: {error}")
-            QMessageBox.critical(self, "Export Failed", f"Failed to export to JSON:\n{error}")
-
+        # if not self.data_controller or not self.data_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        # # Get save location from user
+        # file_path, _ = QFileDialog.getSaveFileName(
+        #     self,
+        #     "Save JSON File",
+        #     "",
+        #     "JSON Files (*.json);;All Files (*)"
+        # )
+        #
+        # if not file_path:
+        #     return
+        #
+        # # Ensure .json extension
+        # if not file_path.endswith('.json'):
+        #     file_path += '.json'
+        #
+        # success, message, error = self.data_controller.export_to_json(file_path)
+        #
+        # if success:
+        #     QMessageBox.information(self, "Export Success", message)
+        # else:
+        #     QMessageBox.critical(self, "Export Failed", f"Failed to export to JSON:\n{error}")

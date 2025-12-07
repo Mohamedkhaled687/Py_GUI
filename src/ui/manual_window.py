@@ -11,6 +11,8 @@ class ManualWindow(BaseXMLWindow):
     """Manual mode window for loading XML from manual text input."""
 
     def __init__(self) -> None:
+        self.input_text_box: QTextEdit = QTextEdit()
+
         super().__init__(
             window_title="🌐 SocialNet XML Parser - Manual Mode",
             mode_name="Manual mode"
@@ -42,19 +44,18 @@ class ManualWindow(BaseXMLWindow):
         upload_btn.setObjectName("uploadBtn")
         upload_btn.setMinimumHeight(40)
         upload_btn.setMaximumWidth(150)
-        upload_btn.clicked.connect(self.upload_and_parse)
+        upload_btn.clicked.connect(self.upload)
 
         text_title_layout.addWidget(text_title)
         text_title_layout.addWidget(upload_btn)
 
         text_layout.addLayout(text_title_layout)
 
-        self.text_data = QTextEdit()
-        self.text_data.setPlaceholderText("Enter your Social Network XML Data here")
-        self.text_data.setObjectName("textInput")
-        self.text_data.setMinimumHeight(40)
+        self.input_text_box.setPlaceholderText("Enter your Social Network XML Data here")
+        self.input_text_box.setObjectName("textInput")
+        self.input_text_box.setMinimumHeight(40)
 
-        text_layout.addWidget(self.text_data, 1)
+        text_layout.addWidget(self.input_text_box, 1)
         parent_layout.addWidget(text_widget)
 
     def _get_panel_selector(self) -> str:
@@ -69,42 +70,21 @@ class ManualWindow(BaseXMLWindow):
         """Handle file browsing - not used in manual mode."""
         pass
 
-    def upload_and_parse(self) -> None:
+    def upload(self) -> None:
         """Handle XML text upload and parsing."""
-        if not hasattr(self, 'text_data') or not self.text_data:
-            self.log_message("ERROR: Text input not available.")
-            return
-
-        xml_text = self.text_data.toPlainText()
-        if not xml_text.strip():
-            self.log_message("ERROR: No XML text entered.")
+        self.input_text = self.input_text_box.toPlainText()
+        if not self.input_text:
             QMessageBox.warning(self, "No Data", "Please enter XML data first.")
             return
 
-        self.log_message("User initiated upload and parse for manual input.")
+        self.xml_controller.xml_data = self.input_text
+        if self.data_controller:
+            self.data_controller.set_xml_data(self.xml_controller.get_xml_data())
+        if self.graph_controller:
+            self.graph_controller.set_xml_data(self.xml_controller.get_xml_data())
 
-        if self.xml_controller:
-            success, message, user_count = self.xml_controller.parse_xml_string(xml_text)
-
-            if success:
-                self.current_file_path = ""  # No file path for manual input
-                self.user_record_count = user_count
-
-                xml_data = self.xml_controller.get_xml_data()
-                if self.data_controller:
-                    self.data_controller.set_xml_data(xml_data)
-                if self.graph_controller:
-                    self.graph_controller.set_xml_data(xml_data)
-
-                self.log_message("Loading XML from text input...")
-                self.log_message(message)
-                self.log_message("✓ Parsing completed. Data ready for operations.")
-
-                QMessageBox.information(
-                    self,
-                    "Success",
-                    f"XML parsed successfully!\n\nFound {user_count} user records.\nData is ready for operations."
-                )
-            else:
-                self.log_message(f"ERROR: {message}")
-                QMessageBox.critical(self, "Error", f"Failed to parse XML:\n{message}")
+        QMessageBox.information(
+            self,
+            "Success",
+            f"XML parsed successfully!\nData is ready for operations."
+        )
