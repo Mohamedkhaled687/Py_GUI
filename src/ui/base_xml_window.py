@@ -15,6 +15,9 @@ from ..controllers import XMLController, DataController, GraphController
 from .code_viewer_window import CodeViewerWindow
 from .graph_visualization_window import GraphVisualizationWindow
 
+# utilities imports
+from ..utilities import file_io
+
 # Parent Imports
 from abc import abstractmethod
 
@@ -102,7 +105,7 @@ class BaseXMLWindow(QMainWindow):
         save_btn.setObjectName("saveBtn")
         save_btn.setMinimumHeight(40)
         save_btn.setMaximumWidth(150)
-        # save_btn.clicked.connect(self.save_and_parse)
+        save_btn.clicked.connect(self.save)
 
         result_title_layout = QHBoxLayout()
         result_title_layout.setContentsMargins(20, 20, 20, 20)
@@ -113,11 +116,10 @@ class BaseXMLWindow(QMainWindow):
 
         result_layout.addLayout(result_title_layout)
 
-        result_layout.addWidget(self.result_text_box)
-        self.result_text_box.show()
         self.result_text_box.setReadOnly(True)
         self.result_text_box.setObjectName("resultText")
-        self.result_text_box.setText(self.output_text)
+
+        result_layout.addWidget(self.result_text_box)
         left_layout.addWidget(result_widget)
 
         sub_layout.addWidget(left_widget)
@@ -141,15 +143,15 @@ class BaseXMLWindow(QMainWindow):
 
         parsing_ops = [
             ("📋 Validate XML Structure", self.validate_xml),
-            ("⚙ Correct Errors", self.parse_user_data),
+            ("⚙ Correct Errors", self.correct_errors),
             ("✨ Format XML", self.format_xml),
-            ("Compress File", self.check_for_errors),
+            ("Compress File", self.compress),
             ("Decompress File", self.view_code),
             ("Minify XML", self.view_code),
             ("📄 Export to JSON", self.export_to_json),
             ("🔗 Visualize Network Graph", self.visualize_network),
             ("📊 Show Users Statistics", self.show_user_stats),
-            ("🔍 Search for Topic/Posts", self.show_user_stats)
+            ("🔍 Search for Topic/Posts", self.search)
         ]
 
         for text, handler in parsing_ops:
@@ -220,7 +222,6 @@ class BaseXMLWindow(QMainWindow):
                 border-radius: 8px;
                 color: rgba(220, 230, 240, 255);
                 padding: 12px;
-                font-family: 'Courier New', monospace;
                 font-size: 12px;
             }}
 
@@ -323,6 +324,17 @@ class BaseXMLWindow(QMainWindow):
         """
         raise NotImplementedError("Subclasses must implement upload_and_parse")
 
+    def save(self) -> None:
+        """Handle file browsing."""
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Select XML File",
+            "",
+            "XML Files (*.xml);;All Files (*)"
+        )
+        data_to_save = self.result_text_box.toPlainText()
+        file_io.write_file(file_path, data_to_save)
+
     # Operation methods - Connect to controllers
     def validate_xml(self) -> None:
         """Validate XML structure."""
@@ -345,7 +357,7 @@ class BaseXMLWindow(QMainWindow):
         # else:
         #     QMessageBox.critical(self, "Validation Failed", f"XML validation failed:\n{error}")
 
-    def parse_user_data(self) -> None:
+    def correct_errors(self) -> None:
         """Parse user data and show statistics."""
         # if not self.data_controller or not self.data_controller.xml_data:
         #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
@@ -367,35 +379,6 @@ class BaseXMLWindow(QMainWindow):
         # else:
         #     QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
 
-    def check_for_errors(self) -> None:
-        """Check for data integrity issues."""
-        # if not self.data_controller or not self.data_controller.xml_data:
-        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-        #     return
-        #
-        #
-        # success, errors, warnings, error_msg = self.data_controller.check_for_errors()
-        #
-        # if not success:
-        #     QMessageBox.critical(self, "Error Check Failed", f"Failed to check for errors:\n{error_msg}")
-        #     return
-        #
-        # if not errors and not warnings:
-        #     QMessageBox.information(self, "No Issues", "No errors or warnings found. Data is clean!")
-        # else:
-        #     result_text = ""
-        #     if errors:
-        #         result_text += f"Errors ({len(errors)}):\n" + "\n".join(errors[:10])
-        #         if len(errors) > 10:
-        #             result_text += f"\n... and {len(errors) - 10} more errors"
-        #         result_text += "\n\n"
-        #     if warnings:
-        #         result_text += f"Warnings ({len(warnings)}):\n" + "\n".join(warnings[:10])
-        #         if len(warnings) > 10:
-        #             result_text += f"\n... and {len(warnings) - 10} more warnings"
-        #
-        #     QMessageBox.warning(self, "Issues Found", result_text)
-
     def format_xml(self) -> None:
         """Format/prettify XML file."""
         if not self.input_text:
@@ -406,8 +389,10 @@ class BaseXMLWindow(QMainWindow):
             QMessageBox.critical(self, "Error", "XML controller not available.")
             return
 
-        # self.output_text = file_io.pretty_format(xml=self.input_text)
-        QMessageBox.information(self, "Success", "Successfully formated\n press ok to reveal result")
+        self.output_text = file_io.pretty_format(xml=str(self.input_text))
+        self.result_text_box.setText(self.output_text)
+        self.result_text_box.show()
+        QMessageBox.information(self, "Success", "Successfully formated\n Press ok to reveal result")
 
     def view_code(self) -> None:
         """View XML file content in code viewer."""
@@ -498,3 +483,38 @@ class BaseXMLWindow(QMainWindow):
         #     QMessageBox.information(self, "Export Success", message)
         # else:
         #     QMessageBox.critical(self, "Export Failed", f"Failed to export to JSON:\n{error}")
+
+    def search(self) -> None:
+        pass
+
+    def compress(self) -> None:
+        """Check for data integrity issues."""
+        # if not self.data_controller or not self.data_controller.xml_data:
+        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+        #     return
+        #
+        #
+        # success, errors, warnings, error_msg = self.data_controller.check_for_errors()
+        #
+        # if not success:
+        #     QMessageBox.critical(self, "Error Check Failed", f"Failed to check for errors:\n{error_msg}")
+        #     return
+        #
+        # if not errors and not warnings:
+        #     QMessageBox.information(self, "No Issues", "No errors or warnings found. Data is clean!")
+        # else:
+        #     result_text = ""
+        #     if errors:
+        #         result_text += f"Errors ({len(errors)}):\n" + "\n".join(errors[:10])
+        #         if len(errors) > 10:
+        #             result_text += f"\n... and {len(errors) - 10} more errors"
+        #         result_text += "\n\n"
+        #     if warnings:
+        #         result_text += f"Warnings ({len(warnings)}):\n" + "\n".join(warnings[:10])
+        #         if len(warnings) > 10:
+        #             result_text += f"\n... and {len(warnings) - 10} more warnings"
+        #
+        #     QMessageBox.warning(self, "Issues Found", result_text)
+    def decompress(self) -> None:
+        pass
+

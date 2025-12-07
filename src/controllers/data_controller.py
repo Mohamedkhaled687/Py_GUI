@@ -294,7 +294,7 @@ class DataController:
 
     def search_in_posts(self,
                        word:Optional[str] = None,
-                       topic: Optional[str] =  None
+                       topic: Optional[str] = None
                        )->List[str] | None:
         """
         searching ability in the post for a topic or a word
