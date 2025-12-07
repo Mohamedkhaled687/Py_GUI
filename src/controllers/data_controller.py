@@ -291,3 +291,40 @@ class DataController:
             return True, f"Successfully exported {len(users)} users to JSON. File saved: {file_path}", None
         except Exception as e:
             return False, "", f"Failed to export to JSON: {str(e)}"
+
+    def search_in_posts(self,
+                       word:Optional[str] = None,
+                       topic: Optional[str] =  None
+                       )->List[str] | None:
+        """
+        searching ability in the post for a topic or a word
+        :param word: string word to search for in all posts
+        :param topic: string topic to search for in all posts
+        :return: List[str], posts that has the word or the topic written in them
+                 \when error: returns None
+        """
+        if self.xml_data is None:
+            return None
+        if (word is None and topic is None) or (word is not None and topic is not None):
+            return None
+
+        result = []
+        users = self.xml_data.findall('.//user')
+        for user in users:
+            for post_elem in user.findall('.//post'):
+                if word is not None:
+                     if post_elem.text:
+                        ack = post_elem.find('body').text.find(word)
+                        if ack > 0:
+                            result.append(f"in user: {user.find('name').text.strip()}'s. found relevant post: {post_elem.find('body').text.strip()}")
+                if topic is not None:
+                    for topic_elem in post_elem.findall('.//topics/topic'):
+                        if topic_elem is not None and topic_elem.text:
+                            ack = topic_elem.text.find(topic)
+                            if ack > 0:
+                                result.append(f"in user: {user.find('name').text.strip()}'s. found relevant post: {post_elem.find('body').text.strip()}")
+
+        if len(result) == 0:
+            result.append("found no relevant posts in any user's posts")
+
+        return result
