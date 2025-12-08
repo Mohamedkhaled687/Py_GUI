@@ -586,7 +586,7 @@ class BaseXMLWindow(QMainWindow):
         # 8. Execute the Dialog
         dialog.exec()
 
-    def search_in_post(self, keyword: str, Type: str) -> list[str]:
+    def search_in_post(self, keyword: str, Type: str) -> Optional[List[str]]:
         """Placeholder logic for searching within topics."""
         if Type =='word':
             return self.data_controller.search_in_posts(word = keyword)

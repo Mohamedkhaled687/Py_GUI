@@ -120,7 +120,7 @@ class XMLController:
                 lines[0] = '<?xml version="1.0" encoding="UTF-8"?>'
             formatted_xml = '\n'.join(lines)
 
-            if dest_path is None or "":
+            if dest_path is None or dest_path == "":
                 dest_path = file_path
             # Save the formatted XML to destination path
             with open(dest_path, 'w', encoding='utf-8') as f:

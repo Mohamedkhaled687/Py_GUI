@@ -4,7 +4,7 @@ Data Controller - Handles data operations like parsing, statistics, error checki
 
 import json
 import xml.etree.ElementTree as ET
-from typing import Optional, Tuple, Dict, List, Any
+from typing import Optional, Tuple, Dict, List, Any, Union
 
 
 class DataController:
@@ -293,15 +293,15 @@ class DataController:
             return False, "", f"Failed to export to JSON: {str(e)}"
 
     def search_in_posts(self,
-                       word:Optional[str] = None,
+                       word: Optional[str] = None,
                        topic: Optional[str] = None
-                       )->List[str] | None:
+                       ) -> Optional[List[str]]:
         """
         searching ability in the post for a topic or a word
         :param word: string word to search for in all posts
         :param topic: string topic to search for in all posts
         :return: List[str], posts that has the word or the topic written in them
-                 \when error: returns None
+        when error: returns None
         """
         if self.xml_data is None:
             return None

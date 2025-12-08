@@ -5,9 +5,10 @@ Controllers should NOT touch disk operations directly.
 import re
 import pathlib
 from pathlib import Path
+from typing import Tuple, Union
 
 
-def read_file(path: str) -> [bool, str]:
+def read_file(path: str) -> Tuple[bool, str]:
     """
     Reads a file and returns (success, content or error message).
     This avoids exceptions leaking into controllers or CLI.
@@ -58,7 +59,7 @@ def pretty_format(xml: str, indent: str = "    ") -> str:
     return "\n".join(formatted)
 
 
-def write_file(path: str, data: str) -> [bool, str]:
+def write_file(path: str, data: str) -> Tuple[bool, str]:
     """
     Writes data to a file in UTF-8.
     Returns (success, message).
@@ -74,7 +75,7 @@ def write_file(path: str, data: str) -> [bool, str]:
         return False, f"File error: {e}"
 
 
-def write_binary(path: str, data: bytes) -> [bool, str]:
+def write_binary(path: str, data: bytes) -> Tuple[bool, str]:
     """
     Writes binary data (used by compress/decompress).
     """
@@ -85,7 +86,7 @@ def write_binary(path: str, data: bytes) -> [bool, str]:
         return False, str(e)
 
 
-def read_binary(path: str) -> [bool, bytes | str]:
+def read_binary(path: str) -> Tuple[bool, Union[bytes, str]]:
     """
     Reads binary data safely.
     """

@@ -3,7 +3,8 @@ Graph Visualization Window - UI component for displaying network graphs.
 """
 
 from typing import Optional, Dict, List, Tuple
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+                                QPushButton, QMessageBox, QFileDialog)
 from PySide6.QtCore import Qt, QSize
 import matplotlib
 matplotlib.use('QtAgg')
@@ -67,7 +68,7 @@ class GraphVisualizationWindow(QWidget):
                 color: white;
             }
         """)
-        close_btn.clicked.connect(self.close)
+        close_btn.clicked.connect(self.handle_close)
         title_layout.addWidget(close_btn)
         
         # Matplotlib figure and canvas
@@ -136,4 +137,45 @@ class GraphVisualizationWindow(QWidget):
         
         # Refresh canvas
         self.canvas.draw()
+    
+    def handle_close(self) -> None:
+        """Handle close button click with save dialog option."""
+        # Show message box asking if user wants to save
+        reply = QMessageBox.question(
+            self,
+            "Save Graph Image",
+            "Do you want to save the graph visualization image?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            # Open file dialog to save the image
+            # QFileDialog.getSaveFileName returns Tuple[str, str] (file_path, selected_filter)
+            file_path, selected_filter = QFileDialog.getSaveFileName(
+                self,
+                "Save Graph Image",
+                "social_network_graph.png",
+                "PNG Image (*.png);;JPEG Image (*.jpg);;PDF Document (*.pdf);;SVG Image (*.svg)"
+            )
+            
+            if file_path:
+                try:
+                    # Save the figure to the selected file
+                    self.figure.savefig(file_path, dpi=300, bbox_inches='tight', 
+                                       facecolor='white', edgecolor='none')
+                    QMessageBox.information(
+                        self,
+                        "Success",
+                        f"Graph image saved successfully to:\n{file_path}"
+                    )
+                except Exception as e:
+                    QMessageBox.critical(
+                        self,
+                        "Error",
+                        f"Failed to save image:\n{str(e)}"
+                    )
+        
+        # Close the window regardless of save choice
+        self.close()
 
