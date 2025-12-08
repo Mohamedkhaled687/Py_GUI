@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional, Dict, List, Tuple, Any
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QTextEdit, QLineEdit, QFileDialog,
-                               QMessageBox, QLabel)
+                               QMessageBox, QLabel, QDialog)
 from PySide6.QtCore import Qt, Signal, QSize
 
 # Controller imports
@@ -359,25 +359,25 @@ class BaseXMLWindow(QMainWindow):
 
     def correct_errors(self) -> None:
         """Parse user data and show statistics."""
-        # if not self.data_controller or not self.data_controller.xml_data:
-        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-        #     return
-        #
-        # success, stats, error = self.data_controller.parse_user_data()
-        #
-        # if success:
-        #     if 'sample_user' in stats and stats['sample_user']:
-        #         sample = stats['sample_user']
-        #
-        #     stats_text = (
-        #         f"Total Users: {stats.get('total_users', 0)}\n"
-        #         f"Total Followers: {stats.get('total_followers', 0)}\n"
-        #         f"Total Following: {stats.get('total_following', 0)}\n"
-        #         f"Total Posts: {stats.get('total_posts', 0)}"
-        #     )
-        #     QMessageBox.information(self, "Parse Results", stats_text)
-        # else:
-        #     QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
+        if not self.data_controller or not self.data_controller.xml_data:
+            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+            return
+
+        success, stats, error = self.data_controller.parse_user_data()
+
+        if success:
+            if 'sample_user' in stats and stats['sample_user']:
+                sample = stats['sample_user']
+
+            stats_text = (
+                f"Total Users: {stats.get('total_users', 0)}\n"
+                f"Total Followers: {stats.get('total_followers', 0)}\n"
+                f"Total Following: {stats.get('total_following', 0)}\n"
+                f"Total Posts: {stats.get('total_posts', 0)}"
+            )
+            QMessageBox.information(self, "Parse Results", stats_text)
+        else:
+            QMessageBox.critical(self, "Parse Failed", f"Failed to parse user data:\n{error}")
 
     def format_xml(self) -> None:
         """Format/prettify XML file."""
@@ -418,74 +418,181 @@ class BaseXMLWindow(QMainWindow):
 
     def visualize_network(self) -> None:
         """Visualize network graph."""
-        # if not self.graph_controller or not self.graph_controller.xml_data:
-        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-        #     return
-        #
-        # success, nodes, edges, error = self.graph_controller.build_graph()
-        #
-        # if success:
-        #     try:
-        #         graph_window = GraphVisualizationWindow(nodes, edges, self.size(), self)
-        #         graph_window.show()
-        #     except Exception as e:
-        #         QMessageBox.critical(self, "Error", f"Failed to open graph visualization:\n{str(e)}")
-        # else:
-        #     QMessageBox.critical(self, "Graph Build Failed", f"Failed to build graph:\n{error}")
+        if not self.graph_controller or not self.graph_controller.xml_data:
+            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+            return
+
+        success, nodes, edges, error = self.graph_controller.build_graph()
+
+        if success:
+            try:
+                graph_window = GraphVisualizationWindow(nodes, edges, self.size(), self)
+                graph_window.show()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to open graph visualization:\n{str(e)}")
+        else:
+            QMessageBox.critical(self, "Graph Build Failed", f"Failed to build graph:\n{error}")
 
     def show_user_stats(self) -> None:
         """Show user statistics."""
-        # if not self.data_controller or not self.data_controller.xml_data:
-        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-        #     return
-        #
-        # success, stats, error = self.data_controller.calculate_statistics()
-        #
-        # if success:
-        #
-        #     stats_text = (
-        #         f"User Statistics:\n\n"
-        #         f"Total Users: {stats.get('total_users', 0)}\n"
-        #         f"Total Posts: {stats.get('total_posts', 0)}\n"
-        #         f"Total Followers: {stats.get('total_followers', 0)}\n"
-        #         f"Total Following: {stats.get('total_following', 0)}\n"
-        #         f"Average Followers: {stats.get('avg_followers', 0):.2f}\n"
-        #         f"Average Posts: {stats.get('avg_posts', 0):.2f}"
-        #     )
-        #     QMessageBox.information(self, "User Statistics", stats_text)
-        # else:
-        #     QMessageBox.critical(self, "Statistics Failed", f"Failed to calculate statistics:\n{error}")
+        if not self.data_controller or not self.data_controller.xml_data:
+            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+            return
+
+        success, stats, error = self.data_controller.calculate_statistics()
+
+        if success:
+
+            stats_text = (
+                f"User Statistics:\n\n"
+                f"Total Users: {stats.get('total_users', 0)}\n"
+                f"Total Posts: {stats.get('total_posts', 0)}\n"
+                f"Total Followers: {stats.get('total_followers', 0)}\n"
+                f"Total Following: {stats.get('total_following', 0)}\n"
+                f"Average Followers: {stats.get('avg_followers', 0):.2f}\n"
+                f"Average Posts: {stats.get('avg_posts', 0):.2f}"
+            )
+            QMessageBox.information(self, "User Statistics", stats_text)
+        else:
+            QMessageBox.critical(self, "Statistics Failed", f"Failed to calculate statistics:\n{error}")
 
     def export_to_json(self) -> None:
         """Export XML data to JSON format."""
-        # if not self.data_controller or not self.data_controller.xml_data:
-        #     QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
-        #     return
-        #
-        # # Get save location from user
-        # file_path, _ = QFileDialog.getSaveFileName(
-        #     self,
-        #     "Save JSON File",
-        #     "",
-        #     "JSON Files (*.json);;All Files (*)"
-        # )
-        #
-        # if not file_path:
-        #     return
-        #
-        # # Ensure .json extension
-        # if not file_path.endswith('.json'):
-        #     file_path += '.json'
-        #
-        # success, message, error = self.data_controller.export_to_json(file_path)
-        #
-        # if success:
-        #     QMessageBox.information(self, "Export Success", message)
-        # else:
-        #     QMessageBox.critical(self, "Export Failed", f"Failed to export to JSON:\n{error}")
+        if not self.data_controller or not self.data_controller.xml_data:
+            QMessageBox.warning(self, "No Data", "Please upload and parse an XML file first.")
+            return
+
+        # Get save location from user
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save JSON File",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+
+        if not file_path:
+            return
+
+        # Ensure .json extension
+        if not file_path.endswith('.json'):
+            file_path += '.json'
+
+        success, message, error = self.data_controller.export_to_json(file_path)
+
+        if success:
+            QMessageBox.information(self, "Export Success", message)
+        else:
+            QMessageBox.critical(self, "Export Failed", f"Failed to export to JSON:\n{error}")
 
     def search(self) -> None:
-        pass
+        """
+        Opens a larger pop-up window with an input field,
+        an output display area, and search buttons.
+        """
+        # 1. Create the Dialog Window
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Search")
+        dialog.setFixedSize(600, 450)  # Increased size
+
+        # Apply the dark theme (updated to include QTextEdit styling)
+        dialog.setStyleSheet("""
+            QDialog {
+                background-color: rgb(20, 35, 55);
+                border: 2px solid rgba(100, 150, 200, 100);
+            }
+            QLineEdit {
+                background-color: rgba(30, 45, 65, 180);
+                border: 1px solid rgba(80, 120, 160, 120);
+                border-radius: 5px;
+                color: white;
+                padding: 8px;
+                font-size: 14px;
+            }
+            QTextEdit {
+                background-color: rgba(15, 20, 35, 180);
+                border: 1px solid rgba(80, 120, 160, 120);
+                border-radius: 5px;
+                color: rgba(220, 230, 240, 255);
+                padding: 10px;
+                font-size: 13px;
+            }
+            QPushButton {
+                background-color: rgba(40, 70, 110, 180);
+                border: 1px solid rgba(80, 120, 180, 150);
+                border-radius: 5px;
+                color: white;
+                padding: 6px 15px;
+            }
+            QPushButton:hover {
+                background-color: rgba(60, 90, 130, 200);
+            }
+        """)
+
+        # 2. Setup Layouts
+        layout = QVBoxLayout(dialog)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # 3. Input Area
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Enter keyword to search...")
+        layout.addWidget(search_input)
+
+        # 4. Output Area (New Addition)
+        result_area = QTextEdit()
+        result_area.setReadOnly(True)
+        result_area.setPlaceholderText("Search results will appear here...")
+        layout.addWidget(result_area)
+
+        # 5. Buttons Area (Bottom Right)
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()  # Pushes buttons to the right
+        btn_layout.setSpacing(10)  # Gap between buttons
+
+        btn_topic = QPushButton("Search in Topic")
+        btn_post = QPushButton("Search in Post")
+
+        btn_layout.addWidget(btn_topic)
+        btn_layout.addWidget(btn_post)
+
+        layout.addLayout(btn_layout)
+
+        # 6. Define Internal Helper Functions
+        def on_search_topic():
+            text = search_input.text().strip()
+            if text:
+                # Clear previous results
+                result_area.clear()
+                result_area.append(f"Searching for '{text}' in Topics...\n\n")
+                # Call the main class function
+                result  = self.search_in_post(text,Type='topic')
+                for i in range (len(result)):
+                    result_area.append(result[i] + '\n\n')
+
+        def on_search_post():
+            text = search_input.text().strip()
+            if text:
+                result_area.clear()
+                result_area.append(f"Searching for '{text}' in Posts...\n")
+
+                result = self.search_in_post(text,Type= 'word')
+                for i in range (len(result)):
+                    result_area.append(result[i] + '\n')
+
+        # 7. Connect Signals
+        btn_topic.clicked.connect(on_search_topic)
+        btn_post.clicked.connect(on_search_post)
+
+        # 8. Execute the Dialog
+        dialog.exec()
+
+    def search_in_post(self, keyword: str, Type: str) -> list[str]:
+        """Placeholder logic for searching within topics."""
+        if Type =='word':
+            return self.data_controller.search_in_posts(word = keyword)
+        else:
+            return self.data_controller.search_in_posts(topic = keyword)
+
 
     def compress(self) -> None:
         """Check for data integrity issues."""

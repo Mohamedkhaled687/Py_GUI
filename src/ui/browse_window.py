@@ -5,6 +5,7 @@ from typing import Optional
 from PySide6.QtWidgets import QPushButton, QLineEdit, QFileDialog, QMessageBox, QLabel, QVBoxLayout, QHBoxLayout, \
     QWidget
 from PySide6.QtCore import Qt
+import xml.etree.ElementTree as ET
 
 from .base_xml_window import BaseXMLWindow
 
@@ -93,13 +94,13 @@ class BrowseWindow(BaseXMLWindow):
             return
 
         file_path = self.file_path_box.text()
-        self.input_text = file_io.read_file(file_path)
+        _,self.input_text = file_io.read_file(file_path)
         QMessageBox.information(
             self,
             "Success",
             f"File loaded successfully!\nData is ready for operations."
         )
-        self.xml_controller.xml_data = self.input_text
+        self.xml_controller.xml_data = ET.fromstring(self.input_text)
         if self.data_controller:
             self.data_controller.set_xml_data(self.xml_controller.get_xml_data())
         if self.graph_controller:
