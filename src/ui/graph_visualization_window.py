@@ -75,8 +75,9 @@ class GraphVisualizationWindow(QWidget):
             # Build locally if not provided
             self._build_local_graph()
         
-        # Update info label with new metrics
+        # Update both info label and statistics with new metrics
         self._update_info_label()
+        self._update_statistics_group()
         self.draw_graph()
     
     def _update_info_label(self) -> None:
@@ -183,6 +184,9 @@ class GraphVisualizationWindow(QWidget):
         # Add to main layout
         main_layout.addWidget(graph_container, 3)
         main_layout.addWidget(control_panel, 1)
+        
+        # Update statistics after UI is set up
+        self._update_statistics_group()
     
     def _create_title_bar(self):
         """Create the title bar with graph information."""
@@ -420,32 +424,41 @@ class GraphVisualizationWindow(QWidget):
     def _create_statistics_group(self):
         """Create network statistics display group."""
         group = QGroupBox("Network Statistics")
-        layout = QVBoxLayout(group)
-        layout.setSpacing(8)
+        self.stats_layout = QVBoxLayout(group)
+        self.stats_layout.setSpacing(8)
         
-        # Statistics text
+        # Create label to hold statistics
+        self.stats_label = QLabel()
+        self.stats_label.setWordWrap(True)
+        self.stats_label.setStyleSheet("font-size: 11px; line-height: 1.5;")
+        self.stats_layout.addWidget(self.stats_label)
+        
+        return group
+    
+    def _update_statistics_group(self):
+        """Update the statistics group with current metrics data."""
+        if not hasattr(self, 'stats_label'):
+            return
+        
+        # Build statistics text from metrics
         stats_text = f"""
 <b>Network Metrics:</b><br>
-• Nodes: {self.metrics['num_nodes']}<br>
-• Edges: {self.metrics['num_edges']}<br>
-• Avg Followers: {self.metrics['avg_in_degree']:.1f}<br>
-• Avg Following: {self.metrics['avg_out_degree']:.1f}<br>
+• Nodes: {self.metrics.get('num_nodes', 0)}<br>
+• Edges: {self.metrics.get('num_edges', 0)}<br>
+• Density: {self.metrics.get('density', 0):.3f}<br>
+• Avg Followers: {self.metrics.get('avg_in_degree', 0):.1f}<br>
+• Avg Following: {self.metrics.get('avg_out_degree', 0):.1f}<br>
         """
         
         if 'most_influential' in self.metrics:
             inf = self.metrics['most_influential']
-            stats_text += f"<br><b>Most Influential:</b><br>• {inf['name']} ({inf['followers']} followers)<br>"
+            stats_text += f"<br><b>Most Influential:</b><br>• {inf['name']}<br>  ({inf['followers']} followers)<br>"
         
         if 'most_active' in self.metrics:
             act = self.metrics['most_active']
-            stats_text += f"<br><b>Most Active:</b><br>• {act['name']} (follows {act['following']})<br>"
+            stats_text += f"<br><b>Most Active:</b><br>• {act['name']}<br>  (follows {act['following']})<br>"
         
-        stats_label = QLabel(stats_text)
-        stats_label.setWordWrap(True)
-        stats_label.setStyleSheet("font-size: 11px; line-height: 1.5;")
-        layout.addWidget(stats_label)
-        
-        return group
+        self.stats_label.setText(stats_text)
     
     def on_layout_changed(self, index):
         """Handle layout algorithm change."""
