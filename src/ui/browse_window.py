@@ -54,7 +54,7 @@ class BrowseWindow(BaseXMLWindow):
         browse_btn.setMinimumWidth(120)
         browse_btn.clicked.connect(self.browse)
 
-        upload_btn = QPushButton("⬆ Upload & Parse")
+        upload_btn = QPushButton("⬆ Upload")
         upload_btn.setObjectName("uploadBtn")
         upload_btn.setMinimumHeight(40)
         upload_btn.setMinimumWidth(180)
