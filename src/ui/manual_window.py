@@ -5,7 +5,7 @@ from typing import Optional
 from PySide6.QtWidgets import QPushButton, QTextEdit, QMessageBox, QLabel, QVBoxLayout, QHBoxLayout, QWidget
 
 from .base_xml_window import BaseXMLWindow
-
+import xml.etree.ElementTree as ET
 
 class ManualWindow(BaseXMLWindow):
     """Manual mode window for loading XML from manual text input."""
@@ -77,7 +77,7 @@ class ManualWindow(BaseXMLWindow):
             QMessageBox.warning(self, "No Data", "Please enter XML data first.")
             return
 
-        self.xml_controller.xml_data = self.input_text
+        self.xml_controller.xml_data = ET.fromstring(self.input_text)
         if self.data_controller:
             self.data_controller.set_xml_data(self.xml_controller.get_xml_data())
         if self.graph_controller:

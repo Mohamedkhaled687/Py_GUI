@@ -124,13 +124,13 @@ class GraphVisualizationWindow(QWidget):
             self.metrics = {}
             return
         
-        metrics = {}
+        metrics = {'num_nodes': self.graph.number_of_nodes(),
+                   'num_edges': self.graph.number_of_edges(),
+                   'density': nx.density(self.graph)
+                   }
         
         # Basic metrics
-        metrics['num_nodes'] = self.graph.number_of_nodes()
-        metrics['num_edges'] = self.graph.number_of_edges()
-        metrics['density'] = nx.density(self.graph)
-        
+
         # Degree metrics
         in_degrees = dict(self.graph.in_degree())
         out_degrees = dict(self.graph.out_degree())
