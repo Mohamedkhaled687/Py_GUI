@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from typing import Optional, Tuple, Dict, List
 import networkx as nx
 import numpy as np
-from ..utilities import DataExtractor
+from ..utilities import DataParser
 
 
 class GraphController:
@@ -36,8 +36,15 @@ class GraphController:
             return False, {}, [], "No data loaded. Please upload and parse an XML file first."
         
         try:
-            # Use DataExtractor to get nodes and edges
-            nodes, edges = DataExtractor.extract_graph_data(self.xml_data)
+            # Use DataParser to parse nodes and edges
+            parser = DataParser(self.xml_data)
+            nodes, edges = parser.get_graph_data()
+            
+            # Validate parsed data
+            is_valid, errors = parser.validate_data()
+            if not is_valid:
+                # Log errors but continue (data might still be usable)
+                print(f"Data validation warnings: {errors}")
             
             if len(nodes) == 0:
                 return False, {}, [], "No users found in XML data."
