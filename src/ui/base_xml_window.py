@@ -143,13 +143,13 @@ class BaseXMLWindow(QMainWindow):
 
         parsing_ops = [
             ("📋 Validate XML Structure", self.validate_xml),
-            ("⚙ Correct Errors", self.correct_errors),
+            ("🛠️ Correct Errors", self.correct_errors),
             ("✨ Format XML", self.format_xml),
-            ("Compress File", self.compress),
-            ("Decompress File", self.view_code),
-            ("Minify XML", self.view_code),
+            ("📦 Compress File", self.compress),
+            ("📂 Decompress File", self.view_code),
+            ("✂️ Minify XML", self.view_code),
             ("📄 Export to JSON", self.export_to_json),
-            ("🔗 Visualize Network Graph", self.visualize_network),
+            ("🕸️ Visualize Network Graph", self.visualize_network),
             ("📊 Show Users Statistics", self.show_user_stats),
             ("🔍 Search for Topic/Posts", self.search)
         ]
