@@ -47,7 +47,16 @@ class GraphVisualizationWindow(QWidget):
         # Graph and metrics should be provided by the controller
         # They are stored separately here for visualization purposes
         self.graph = None
-        self.metrics = {}
+        self.metrics = {
+            'num_nodes': 0,
+            'num_edges': 0,
+            'density': 0,
+            'avg_in_degree': 0,
+            'avg_out_degree': 0,
+            'in_degrees': {},
+            'out_degrees': {}
+        }
+        self.info_label = None
         
         self.setup_ui()
         self.set_graph_data(nodes, edges)
@@ -65,7 +74,18 @@ class GraphVisualizationWindow(QWidget):
             # Build locally if not provided
             self._build_local_graph()
         
+        # Update info label with new metrics
+        self._update_info_label()
         self.draw_graph()
+    
+    def _update_info_label(self) -> None:
+        """Update the title bar info label with current metrics."""
+        if self.info_label is not None:
+            self.info_label.setText(
+                f"Nodes: {self.metrics.get('num_nodes', 0)} | "
+                f"Edges: {self.metrics.get('num_edges', 0)} | "
+                f"Density: {self.metrics.get('density', 0):.3f}"
+            )
     
     def _build_local_graph(self) -> None:
         """Build a local NetworkX graph for visualization if not provided by controller."""
@@ -187,19 +207,19 @@ class GraphVisualizationWindow(QWidget):
             font-weight: bold;
         """)
         
-        info_label = QLabel(
-            f"Nodes: {self.metrics['num_nodes']} | "
-            f"Edges: {self.metrics['num_edges']} | "
-            f"Density: {self.metrics['density']:.3f}"
+        self.info_label = QLabel(
+            f"Nodes: {self.metrics.get('num_nodes', 0)} | "
+            f"Edges: {self.metrics.get('num_edges', 0)} | "
+            f"Density: {self.metrics.get('density', 0):.3f}"
         )
-        info_label.setStyleSheet("""
+        self.info_label.setStyleSheet("""
             color: rgba(200, 220, 240, 255);
             font-size: 13px;
         """)
         
         title_layout.addWidget(title_label)
         title_layout.addStretch()
-        title_layout.addWidget(info_label)
+        title_layout.addWidget(self.info_label)
         
         # Close button
         close_btn = QPushButton("✕")
@@ -464,16 +484,16 @@ class GraphVisualizationWindow(QWidget):
     def get_node_sizes(self):
         """Calculate node sizes based on influence (followers)."""
         if not self.influence_checkbox.isChecked():
-            return [self.size_spinbox.value()] * self.G.number_of_nodes()
+            return [self.size_spinbox.value()] * self.graph.number_of_nodes()
         
-        in_degrees = self.metrics['in_degrees']
+        in_degrees = self.metrics.get('in_degrees', {})
         base_size = self.size_spinbox.value()
         
         # Calculate sizes based on followers (in-degree)
         sizes = []
         max_followers = max(in_degrees.values()) if in_degrees.values() else 1
         
-        for node in self.G.nodes():
+        for node in self.graph.nodes():
             followers = in_degrees.get(node, 0)
             # Scale size: minimum 50% of base, maximum 200% of base
             scale = 0.5 + 1.5 * (followers / max_followers) if max_followers > 0 else 1
@@ -486,23 +506,23 @@ class GraphVisualizationWindow(QWidget):
         scheme_index = self.color_combo.currentIndex()
         
         if scheme_index == 0:  # By Influence (Blue gradient)
-            in_degrees = self.metrics['in_degrees']
+            in_degrees = self.metrics.get('in_degrees', {})
             max_influence = max(in_degrees.values()) if in_degrees.values() else 1
-            colors = [in_degrees.get(node, 0) / max_influence for node in self.G.nodes()]
+            colors = [in_degrees.get(node, 0) / max_influence for node in self.graph.nodes()]
             return colors
         
         elif scheme_index == 1:  # By Activity (Green gradient)
-            out_degrees = self.metrics['out_degrees']
+            out_degrees = self.metrics.get('out_degrees', {})
             max_activity = max(out_degrees.values()) if out_degrees.values() else 1
-            colors = [out_degrees.get(node, 0) / max_activity for node in self.G.nodes()]
+            colors = [out_degrees.get(node, 0) / max_activity for node in self.graph.nodes()]
             return colors
         
         elif scheme_index == 2:  # Uniform
-            return ['steelblue'] * self.G.number_of_nodes()
+            return ['steelblue'] * self.graph.number_of_nodes()
         
         else:  # Random colors
             np.random.seed(42)
-            return np.random.rand(self.G.number_of_nodes())
+            return np.random.rand(self.graph.number_of_nodes())
     
     def draw_graph(self):
         """Draw the network graph with current settings."""
