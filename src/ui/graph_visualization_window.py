@@ -59,6 +59,7 @@ class GraphVisualizationWindow(QWidget):
         self.info_label = None
         
         self.setup_ui()
+        # Set graph data after UI is created so info_label exists
         self.set_graph_data(nodes, edges)
     
     def set_graph_data(self, nodes: dict, edges: list, G=None, metrics=None) -> None:
