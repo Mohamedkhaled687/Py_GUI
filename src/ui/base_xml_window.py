@@ -1,7 +1,6 @@
 """
 Base XML Window - Provides common functionality for XML-related UI windows.
 """
-from datetime import datetime
 from typing import Optional, Dict, List, Tuple, Any
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QTextEdit, QLineEdit, QFileDialog,
