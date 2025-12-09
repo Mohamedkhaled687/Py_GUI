@@ -5,7 +5,7 @@ Supports multiple layout algorithms, interactive features, and image export
 
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                               QPushButton, QComboBox, QSpinBox, QCheckBox,
-                              QGroupBox, QFileDialog, QMessageBox, QSlider)
+                              QGroupBox, QFileDialog, QMessageBox, QSlider, QTabWidget)
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import matplotlib
@@ -44,6 +44,10 @@ class GraphVisualizationWindow(QWidget):
         self.edge_width = 1.5
         self.node_base_size = 500
         
+        # Track selected users for highlighting
+        self.selected_users = set()
+        self.selected_mutual_followers = set()
+        
         # Graph and metrics should be provided by the controller
         # They are stored separately here for visualization purposes
         self.graph = None
@@ -75,9 +79,12 @@ class GraphVisualizationWindow(QWidget):
             # Build locally if not provided
             self._build_local_graph()
         
-        # Update both info label and statistics with new metrics
+        # Update info label with new metrics
         self._update_info_label()
+        # Update statistics display
         self._update_statistics_group()
+        # Update most active user display
+        self._update_most_active_group()
         self.draw_graph()
     
     def _update_info_label(self) -> None:
@@ -184,9 +191,6 @@ class GraphVisualizationWindow(QWidget):
         # Add to main layout
         main_layout.addWidget(graph_container, 3)
         main_layout.addWidget(control_panel, 1)
-        
-        # Update statistics after UI is set up
-        self._update_statistics_group()
     
     def _create_title_bar(self):
         """Create the title bar with graph information."""
@@ -292,6 +296,12 @@ class GraphVisualizationWindow(QWidget):
                 border-top: 5px solid white;
                 margin-right: 5px;
             }
+            QComboBox QAbstractItemView {
+                background-color: rgba(40, 60, 80, 200);
+                color: white;
+                selection-background-color: rgba(40, 100, 180, 200);
+                border: 1px solid rgba(80, 120, 160, 120);
+            }
             QPushButton {
                 background: rgba(40, 100, 180, 200);
                 border: 1px solid rgba(80, 150, 220, 180);
@@ -322,23 +332,86 @@ class GraphVisualizationWindow(QWidget):
             QCheckBox::indicator:checked {
                 background: rgba(40, 100, 180, 255);
             }
+            QTabWidget {
+                background: transparent;
+            }
+            QTabBar {
+                background: transparent;
+            }
+            QTabBar::tab {
+                background: rgba(40, 60, 80, 180);
+                border: 1px solid rgba(80, 120, 160, 120);
+                border-bottom: none;
+                border-radius: 4px 4px 0px 0px;
+                color: rgba(150, 200, 255, 255);
+                padding: 8px 15px;
+                margin-right: 2px;
+                font-weight: bold;
+            }
+            QTabBar::tab:selected {
+                background: rgba(40, 100, 180, 200);
+                border: 1px solid rgba(80, 150, 220, 180);
+            }
+            QTabBar::tab:hover:!selected {
+                background: rgba(50, 80, 120, 200);
+            }
+            QTabWidget::pane {
+                border: 1px solid rgba(80, 120, 160, 150);
+            }
         """)
         
         panel_layout = QVBoxLayout(panel)
         panel_layout.setContentsMargins(15, 15, 15, 15)
         panel_layout.setSpacing(15)
         
+        # Create tabs for different panels
+        tabs = QTabWidget()
+        
+        # Tab 1: Settings
+        settings_widget = QWidget()
+        settings_layout = QVBoxLayout(settings_widget)
+        settings_layout.setSpacing(15)
+        
         # Layout settings
         layout_group = self._create_layout_group()
-        panel_layout.addWidget(layout_group)
+        settings_layout.addWidget(layout_group)
         
         # Visualization settings
         viz_group = self._create_visualization_group()
-        panel_layout.addWidget(viz_group)
+        settings_layout.addWidget(viz_group)
+        
+        settings_layout.addStretch()
+        tabs.addTab(settings_widget, "⚙️ Settings")
+        
+        # Tab 2: Analysis
+        analysis_widget = QWidget()
+        analysis_layout = QVBoxLayout(analysis_widget)
+        analysis_layout.setSpacing(15)
+        
+        # Most Active User
+        active_group = self._create_most_active_group()
+        analysis_layout.addWidget(active_group)
+        
+        # Mutual Followers
+        mutual_group = self._create_mutual_followers_group()
+        analysis_layout.addWidget(mutual_group)
+        
+        analysis_layout.addStretch()
+        tabs.addTab(analysis_widget, "📊 Analysis")
+        
+        # Tab 3: Statistics
+        stats_widget = QWidget()
+        stats_layout = QVBoxLayout(stats_widget)
+        stats_layout.setSpacing(15)
         
         # Network statistics
         stats_group = self._create_statistics_group()
-        panel_layout.addWidget(stats_group)
+        stats_layout.addWidget(stats_group)
+        
+        stats_layout.addStretch()
+        tabs.addTab(stats_widget, "📈 Statistics")
+        
+        panel_layout.addWidget(tabs)
         
         # Export button
         export_btn = QPushButton("💾 Export Graph as Image")
@@ -349,8 +422,6 @@ class GraphVisualizationWindow(QWidget):
         refresh_btn = QPushButton("🔄 Redraw Graph")
         refresh_btn.clicked.connect(self.draw_graph)
         panel_layout.addWidget(refresh_btn)
-        
-        panel_layout.addStretch()
         
         return panel
     
@@ -459,6 +530,141 @@ class GraphVisualizationWindow(QWidget):
             stats_text += f"<br><b>Most Active:</b><br>• {act['name']}<br>  (follows {act['following']})<br>"
         
         self.stats_label.setText(stats_text)
+    
+    def _create_most_active_group(self):
+        """Create group to display most active user."""
+        group = QGroupBox("Most Active User")
+        layout = QVBoxLayout(group)
+        layout.setSpacing(8)
+        
+        # Create label to hold most active user info
+        self.active_label = QLabel()
+        self.active_label.setWordWrap(True)
+        self.active_label.setStyleSheet("font-size: 11px; line-height: 1.5;")
+        layout.addWidget(self.active_label)
+        
+        return group
+    
+    def _update_most_active_group(self):
+        """Update the most active user display."""
+        if not hasattr(self, 'active_label'):
+            return
+        
+        active_text = "<b>Most Active User</b><br>"
+        
+        if 'most_active' in self.metrics:
+            act = self.metrics['most_active']
+            active_text += f"<br>• <b>{act['name']}</b><br>"
+            active_text += f"  Follows: {act['following']} users"
+        else:
+            active_text += "No data available"
+        
+        self.active_label.setText(active_text)
+    
+    def _create_mutual_followers_group(self):
+        """Create group for mutual followers analysis."""
+        group = QGroupBox("Mutual Followers Analysis")
+        layout = QVBoxLayout(group)
+        layout.setSpacing(10)
+        
+        # Instructions
+        instructions = QLabel("Select users to find mutual followers:")
+        instructions.setStyleSheet("font-size: 10px; color: rgba(150, 180, 220, 255);")
+        layout.addWidget(instructions)
+        
+        # User selection combo boxes (show 2 users)
+        users_list = sorted(list(self.nodes.values())) if self.nodes else []
+        
+        # User 1
+        user1_layout = QHBoxLayout()
+        user1_layout.addWidget(QLabel("User 1:"))
+        self.mutual_user1_combo = QComboBox()
+        self.mutual_user1_combo.addItems(users_list)
+        user1_layout.addWidget(self.mutual_user1_combo)
+        layout.addLayout(user1_layout)
+        
+        # User 2
+        user2_layout = QHBoxLayout()
+        user2_layout.addWidget(QLabel("User 2:"))
+        self.mutual_user2_combo = QComboBox()
+        self.mutual_user2_combo.addItems(users_list)
+        if len(users_list) > 1:
+            self.mutual_user2_combo.setCurrentIndex(1)
+        user2_layout.addWidget(self.mutual_user2_combo)
+        layout.addLayout(user2_layout)
+        
+        # Find mutual followers button
+        find_mutual_btn = QPushButton("🔍 Find Mutual Followers")
+        find_mutual_btn.clicked.connect(self.find_mutual_followers)
+        layout.addWidget(find_mutual_btn)
+        
+        # Results display
+        self.mutual_label = QLabel("No results yet")
+        self.mutual_label.setWordWrap(True)
+        self.mutual_label.setStyleSheet("font-size: 10px; line-height: 1.4;")
+        layout.addWidget(self.mutual_label)
+        
+        return group
+    
+    def find_mutual_followers(self):
+        """Find and display mutual followers between selected users."""
+        if not hasattr(self, 'mutual_user1_combo'):
+            return
+        
+        # Get selected user names
+        user1_name = self.mutual_user1_combo.currentText()
+        user2_name = self.mutual_user2_combo.currentText()
+        
+        if not user1_name or not user2_name:
+            self.mutual_label.setText("Please select both users")
+            return
+        
+        # Find user IDs from names
+        user1_id = None
+        user2_id = None
+        for uid, uname in self.nodes.items():
+            if uname == user1_name:
+                user1_id = uid
+            if uname == user2_name:
+                user2_id = uid
+        
+        if not user1_id or not user2_id:
+            self.mutual_label.setText("Selected users not found")
+            return
+        
+        if user1_id == user2_id:
+            self.mutual_label.setText("Please select different users")
+            return
+        
+        # Get mutual followers from graph (predecessors that are same for both)
+        if self.graph is None:
+            self.mutual_label.setText("No graph data available")
+            return
+        
+        user1_followers = set(self.graph.predecessors(user1_id)) if user1_id in self.graph else set()
+        user2_followers = set(self.graph.predecessors(user2_id)) if user2_id in self.graph else set()
+        
+        mutual_followers = user1_followers & user2_followers
+        
+        # Store selected users for highlighting in graph
+        self.selected_users = {user1_id, user2_id}
+        self.selected_mutual_followers = mutual_followers
+        
+        # Format results
+        result_text = f"<b>Mutual Followers between {user1_name} and {user2_name}:</b><br>"
+        
+        if mutual_followers:
+            result_text += f"<br>Found {len(mutual_followers)} mutual follower(s):<br>"
+            for follower_id in sorted(mutual_followers):
+                follower_name = self.nodes.get(follower_id, follower_id)
+                result_text += f"• {follower_name}<br>"
+        else:
+            result_text += "<br>No mutual followers found"
+        
+        self.mutual_label.setText(result_text)
+        
+        # Redraw graph to highlight selected users
+        self.draw_graph()
     
     def on_layout_changed(self, index):
         """Handle layout algorithm change."""
@@ -604,6 +810,34 @@ class GraphVisualizationWindow(QWidget):
                 edgecolors='white',
                 linewidths=2
             )
+        
+        # Highlight selected users if any
+        if self.selected_users:
+            selected_nodes = [n for n in self.selected_users if n in self.graph.nodes()]
+            if selected_nodes:
+                selected_sizes = [self.get_node_sizes()[list(self.graph.nodes()).index(n)] for n in selected_nodes]
+                nx.draw_networkx_nodes(
+                    self.graph.subgraph(selected_nodes), pos, ax=ax,
+                    node_color='steelblue',
+                    node_size=selected_sizes,
+                    alpha=1.0,
+                    edgecolors='white',
+                    linewidths=3
+                )
+        
+        # Highlight mutual followers
+        if self.selected_mutual_followers:
+            mutual_nodes = [n for n in self.selected_mutual_followers if n in self.graph.nodes()]
+            if mutual_nodes:
+                mutual_sizes = [self.get_node_sizes()[list(self.graph.nodes()).index(n)] for n in mutual_nodes]
+                nx.draw_networkx_nodes(
+                    self.graph.subgraph(mutual_nodes), pos, ax=ax,
+                    node_color='steelblue',
+                    node_size=mutual_sizes,
+                    alpha=1.0,
+                    edgecolors='white',
+                    linewidths=3
+                )
         
         # Draw labels if enabled
         if self.labels_checkbox.isChecked():

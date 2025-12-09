@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from typing import Optional, Tuple, Dict, List
 import networkx as nx
 import numpy as np
-from ..utilities import DataParser
+from ..utilities import DataParser, NetworkAnalyzer
 
 
 class GraphController:
@@ -16,12 +16,16 @@ class GraphController:
         self.xml_data: Optional[ET.Element] = xml_data
         self.G: Optional[nx.DiGraph] = None
         self.metrics: Dict = {}
+        self.analyzer: Optional[NetworkAnalyzer] = None
+        self.nodes_dict: Dict[str, str] = {}
     
     def set_xml_data(self, xml_data: Optional[ET.Element]) -> None:
         """Set the XML data root element."""
         self.xml_data = xml_data
         self.G = None
         self.metrics = {}
+        self.analyzer = None
+        self.nodes_dict = {}
     
     def build_graph(self) -> Tuple[bool, Dict[str, str], List[Tuple[str, str]], Optional[str]]:
         """
@@ -51,6 +55,10 @@ class GraphController:
             
             # Build NetworkX graph
             self.G = self._build_networkx_graph(nodes, edges)
+            # Store nodes_dict for analyzer
+            self.nodes_dict = nodes
+            # Initialize analyzer
+            self.analyzer = NetworkAnalyzer(self.G, self.nodes_dict)
             # Calculate metrics
             self.metrics = self._calculate_metrics(nodes)
             
@@ -123,4 +131,75 @@ class GraphController:
     def get_metrics(self) -> Dict:
         """Get the calculated network metrics."""
         return self.metrics
+    
+    # =====================
+    # Analyzer Delegation Methods
+    # =====================
+    
+    def get_most_influential_user(self) -> Optional[Dict]:
+        """Get the user with most followers."""
+        if not self.analyzer:
+            return None
+        return self.analyzer.get_most_influential_user()
+    
+    def get_top_influencers(self, n: int = 5) -> List[Dict]:
+        """Get top N influencers."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.get_top_influencers(n)
+    
+    def get_most_active_user(self) -> Optional[Dict]:
+        """Get the user who follows most people."""
+        if not self.analyzer:
+            return None
+        return self.analyzer.get_most_active_user()
+    
+    def get_top_active_users(self, n: int = 5) -> List[Dict]:
+        """Get top N active users."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.get_top_active_users(n)
+    
+    def get_mutual_followers(self, user1_id: str, user2_id: str) -> List[Dict]:
+        """Get mutual followers between two users."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.get_mutual_followers(user1_id, user2_id)
+    
+    def get_mutual_followers_between_many(self, user_ids: List[str]) -> List[Dict]:
+        """Get mutual followers between multiple users."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.get_mutual_followers_between_many(user_ids)
+    
+    def suggest_users_to_follow(self, user_id: str, limit: int = 5) -> List[Dict]:
+        """Get user recommendations for a user."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.suggest_users_to_follow(user_id, limit)
+    
+    def suggest_users_batch(self, user_ids: List[str], limit: int = 5) -> Dict[str, List[Dict]]:
+        """Get recommendations for multiple users."""
+        if not self.analyzer:
+            return {}
+        return self.analyzer.suggest_users_batch(user_ids, limit)
+    
+    def get_user_connections(self, user_id: str) -> Optional[Dict]:
+        """Get detailed connection info for a user."""
+        if not self.analyzer:
+            return None
+        return self.analyzer.get_user_connections(user_id)
+    
+    def get_engagement_score(self, user_id: str) -> float:
+        """Get engagement score for a user."""
+        if not self.analyzer:
+            return 0.0
+        return self.analyzer.get_engagement_score(user_id)
+    
+    def get_top_engaged_users(self, n: int = 5) -> List[Dict]:
+        """Get top N engaged users."""
+        if not self.analyzer:
+            return []
+        return self.analyzer.get_top_engaged_users(n)
+
 

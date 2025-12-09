@@ -6,6 +6,7 @@ from .file_io import read_file, write_file, read_binary, write_binary, pretty_fo
 from .token_utils import is_opening_tag, is_closing_tag, extract_tag_name, tokenize
 from .data_extractor import DataExtractor
 from .data_parser import DataParser
+from .network_analyzer import NetworkAnalyzer
 
 __all__ = [
     'read_file',
@@ -19,5 +20,6 @@ __all__ = [
     'tokenize',
     'DataExtractor',
     'DataParser',
+    'NetworkAnalyzer',
 ]
 
