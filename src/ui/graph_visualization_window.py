@@ -44,47 +44,72 @@ class GraphVisualizationWindow(QWidget):
         self.edge_width = 1.5
         self.node_base_size = 500
         
-        # Build NetworkX graph
-        self.G = self._build_networkx_graph()
-        
-        # Calculate network metrics
-        self.metrics = self._calculate_metrics()
+        # Graph and metrics should be provided by the controller
+        # They are stored separately here for visualization purposes
+        self.graph = None
+        self.metrics = {}
         
         self.setup_ui()
+        self.set_graph_data(nodes, edges)
+    
+    def set_graph_data(self, nodes: dict, edges: list, G=None, metrics=None) -> None:
+        """Set graph data for visualization. Can optionally use precomputed graph and metrics from controller."""
+        self.nodes = nodes
+        self.edges = edges
+        
+        if G is not None and metrics is not None:
+            # Use precomputed graph and metrics from controller
+            self.graph = G
+            self.metrics = metrics
+        else:
+            # Build locally if not provided
+            self._build_local_graph()
+        
         self.draw_graph()
     
-    def _build_networkx_graph(self):
-        """Build a NetworkX directed graph from nodes and edges."""
+    def _build_local_graph(self) -> None:
+        """Build a local NetworkX graph for visualization if not provided by controller."""
+        import networkx as nx
+        import numpy as np
+        
         G = nx.DiGraph()
         
         # Add all nodes
         for node_id, node_name in self.nodes.items():
             G.add_node(str(node_id), name=node_name)
         
-        # Add all edges (from_id follows to_id means edge from from_id to to_id)
+        # Add all edges
         for from_id, to_id in self.edges:
             if str(from_id) in G.nodes() and str(to_id) in G.nodes():
                 G.add_edge(str(from_id), str(to_id))
         
-        return G
+        self.graph = G
+        self._calculate_local_metrics()
     
-    def _calculate_metrics(self):
-        """Calculate network metrics for analysis."""
+    def _calculate_local_metrics(self) -> None:
+        """Calculate metrics locally if not provided by controller."""
+        import networkx as nx
+        import numpy as np
+        
+        if self.graph is None:
+            self.metrics = {}
+            return
+        
         metrics = {}
         
         # Basic metrics
-        metrics['num_nodes'] = self.G.number_of_nodes()
-        metrics['num_edges'] = self.G.number_of_edges()
-        metrics['density'] = nx.density(self.G)
+        metrics['num_nodes'] = self.graph.number_of_nodes()
+        metrics['num_edges'] = self.graph.number_of_edges()
+        metrics['density'] = nx.density(self.graph)
         
-        # Degree metrics (in-degree = followers, out-degree = following)
-        in_degrees = dict(self.G.in_degree())
-        out_degrees = dict(self.G.out_degree())
+        # Degree metrics
+        in_degrees = dict(self.graph.in_degree())
+        out_degrees = dict(self.graph.out_degree())
         
         metrics['avg_in_degree'] = np.mean(list(in_degrees.values())) if in_degrees else 0
         metrics['avg_out_degree'] = np.mean(list(out_degrees.values())) if out_degrees else 0
         
-        # Most influential (most followers)
+        # Most influential
         if in_degrees:
             most_influential_id = max(in_degrees, key=in_degrees.get)
             metrics['most_influential'] = {
@@ -93,7 +118,7 @@ class GraphVisualizationWindow(QWidget):
                 'followers': in_degrees[most_influential_id]
             }
         
-        # Most active (follows most people)
+        # Most active
         if out_degrees:
             most_active_id = max(out_degrees, key=out_degrees.get)
             metrics['most_active'] = {
@@ -102,11 +127,10 @@ class GraphVisualizationWindow(QWidget):
                 'following': out_degrees[most_active_id]
             }
         
-        # Store degree dictionaries for visualization
         metrics['in_degrees'] = in_degrees
         metrics['out_degrees'] = out_degrees
         
-        return metrics
+        self.metrics = metrics
     
     def setup_ui(self):
         """Set up the user interface."""
@@ -416,26 +440,26 @@ class GraphVisualizationWindow(QWidget):
     
     def get_layout_positions(self):
         """Calculate node positions based on selected layout algorithm."""
-        if self.G.number_of_nodes() == 0:
+        if self.graph.number_of_nodes() == 0:
             return {}
         
         try:
             if self.current_layout == "spring":
-                pos = nx.spring_layout(self.G, k=1.5, iterations=50, seed=42)
+                pos = nx.spring_layout(self.graph, k=1.5, iterations=50, seed=42)
             elif self.current_layout == "circular":
-                pos = nx.circular_layout(self.G)
+                pos = nx.circular_layout(self.graph)
             elif self.current_layout == "shell":
-                pos = nx.shell_layout(self.G)
+                pos = nx.shell_layout(self.graph)
             elif self.current_layout == "kamada_kawai":
-                pos = nx.kamada_kawai_layout(self.G)
+                pos = nx.kamada_kawai_layout(self.graph)
             elif self.current_layout == "random":
-                pos = nx.random_layout(self.G, seed=42)
+                pos = nx.random_layout(self.graph, seed=42)
             else:
-                pos = nx.spring_layout(self.G, k=1.5, iterations=50, seed=42)
+                pos = nx.spring_layout(self.graph, k=1.5, iterations=50, seed=42)
             return pos
         except:
             # Fallback to circular if layout fails
-            return nx.circular_layout(self.G)
+            return nx.circular_layout(self.graph)
     
     def get_node_sizes(self):
         """Calculate node sizes based on influence (followers)."""
@@ -486,7 +510,7 @@ class GraphVisualizationWindow(QWidget):
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         
-        if self.G.number_of_nodes() == 0:
+        if self.graph is None or self.graph.number_of_nodes() == 0:
             ax.text(0.5, 0.5, 'No nodes to display',
                    horizontalalignment='center', verticalalignment='center',
                    transform=ax.transAxes, fontsize=16, color='gray')
@@ -514,7 +538,7 @@ class GraphVisualizationWindow(QWidget):
         
         # Draw edges
         nx.draw_networkx_edges(
-            self.G, pos, ax=ax,
+            self.graph, pos, ax=ax,
             arrows=True,
             arrowsize=15,
             arrowstyle='->',
@@ -527,7 +551,7 @@ class GraphVisualizationWindow(QWidget):
         # Draw nodes
         if cmap:
             nx.draw_networkx_nodes(
-                self.G, pos, ax=ax,
+                self.graph, pos, ax=ax,
                 node_color=node_colors,
                 node_size=node_sizes,
                 cmap=cmap,
@@ -539,7 +563,7 @@ class GraphVisualizationWindow(QWidget):
             )
         else:
             nx.draw_networkx_nodes(
-                self.G, pos, ax=ax,
+                self.graph, pos, ax=ax,
                 node_color=node_colors,
                 node_size=node_sizes,
                 alpha=0.9,
@@ -549,9 +573,9 @@ class GraphVisualizationWindow(QWidget):
         
         # Draw labels if enabled
         if self.labels_checkbox.isChecked():
-            labels = {node: self.nodes.get(node, node) for node in self.G.nodes()}
+            labels = {node: self.nodes.get(node, node) for node in self.graph.nodes()}
             nx.draw_networkx_labels(
-                self.G, pos, labels, ax=ax,
+                self.graph, pos, labels, ax=ax,
                 font_size=9,
                 font_weight='bold',
                 font_color='darkblue'
@@ -560,7 +584,7 @@ class GraphVisualizationWindow(QWidget):
         # Set title
         ax.set_title(
             f"Social Network Graph - {self.current_layout.replace('_', ' ').title()} Layout\n"
-            f"({self.G.number_of_nodes()} users, {self.G.number_of_edges()} connections)",
+            f"({self.graph.number_of_nodes()} users, {self.graph.number_of_edges()} connections)",
             fontsize=14,
             fontweight='bold',
             pad=20
