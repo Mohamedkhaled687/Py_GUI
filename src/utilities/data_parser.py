@@ -21,14 +21,22 @@ class User:
 class DataParser:
     """Parser for social network XML data."""
     
-    def __init__(self, xml_data: ET.Element):
+    def __init__(self, xml_data):
         """
         Initialize parser with XML data.
         
         Args:
-            xml_data: Root XML element
+            xml_data: Root XML element or XML string
         """
-        self.xml_data = xml_data
+        # Handle both ET.Element and string input
+        if isinstance(xml_data, str):
+            try:
+                self.xml_data = ET.fromstring(xml_data)
+            except ET.ParseError as e:
+                raise ValueError(f"Invalid XML string: {str(e)}")
+        else:
+            self.xml_data = xml_data
+            
         self._users_cache: Optional[Dict[str, User]] = None
         self._nodes_cache: Optional[Dict[str, str]] = None
         self._edges_cache: Optional[List[Tuple[str, str]]] = None
