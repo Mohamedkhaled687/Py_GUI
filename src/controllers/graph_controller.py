@@ -12,15 +12,15 @@ from ..utilities import DataParser, NetworkAnalyzer
 class GraphController:
     """Controller for graph-related operations."""
     
-    def __init__(self, xml_data: Optional[ET.Element] = None) -> None:
-        self.xml_data: Optional[ET.Element] = xml_data
+    def __init__(self, xml_data = None) -> None:
+        self.xml_data = xml_data  # Can be ET.Element or string
         self.G: Optional[nx.DiGraph] = None
         self.metrics: Dict = {}
         self.analyzer: Optional[NetworkAnalyzer] = None
         self.nodes_dict: Dict[str, str] = {}
     
-    def set_xml_data(self, xml_data: Optional[ET.Element]) -> None:
-        """Set the XML data root element."""
+    def set_xml_data(self, xml_data) -> None:
+        """Set the XML data (ET.Element or string)."""
         self.xml_data = xml_data
         self.G = None
         self.metrics = {}
